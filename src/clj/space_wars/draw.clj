@@ -11,18 +11,25 @@
 (defn random-points [] (cons (space-wars.bowyer-watson/point (rand-int 800) (rand-int 600)) (lazy-seq (random-points))))
 
 
-(def points (conj (take 10000 (random-points)) (point 0 0) (point 800 0) (point 0 600) (point 800 600)))
-(def graph (as-graph (bowyer-watson_2d points :boundries (triangle (point -100000 -100000) (point 100000 -100000) (point 0 100000)))
-                     :edge-filter (let [exclude #{(point -100000 -100000) (point 100000 -100000) (point 0 100000)}] ;;same points as in bowyer-watson_2d boundry
+(def points (take 20 (random-points))); (point 0 0) (point 800 0) (point 0 600) (point 800 600)))
+(def bw (bowyer-watson_2d points :boundries (triangle (point -100000 -100000) (point 100000 -100000) (point 0 100000))))
+
+(def graph (as-graph bw :edge-filter (let [exclude #{(point -100000 -100000) (point 100000 -100000) (point 0 100000)}] ;;same points as in bowyer-watson_2d boundry
                                                 (fn [e] (not (or (contains? exclude (:p1 e))
                                                                  (contains? exclude (:p2 e))))))))
-
+(def voronoi (as-voronoi-diagram bw :edge-filter (let [exclude #{(point -100000 -100000) (point 100000 -100000) (point 0 100000)}] ;;same points as in bowyer-watson_2d boundry
+                                                (fn [e] (not (or (contains? exclude (:p1 e))
+                                                                 (contains? exclude (:p2 e))))))))
 (defn draw []
-  (q/stroke 255)             ;; Set the stroke colour to a random grey
-  (q/stroke-weight 1)       ;; Set the stroke thickness randomly
-  (q/fill 255)               ;; Set the fill colour to a random grey
+  (q/stroke 120)
+  (q/stroke-weight 1)
     (doseq [k (keys graph)]
       (doseq [p (get graph k)]
+       (q/line (:x k) (:y k) (:x p) (:y p))))
+  (q/stroke 255 0 0)
+  (q/stroke-weight 1)
+    (doseq [k (keys voronoi)]
+      (doseq [p (get voronoi k)]
        (q/line (:x k) (:y k) (:x p) (:y p)))))       ;; Draw a circle at x y with the correct diameter
 
 (q/defsketch example                  ;; Define a new sketch named example

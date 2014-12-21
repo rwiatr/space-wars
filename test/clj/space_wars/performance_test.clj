@@ -2,10 +2,11 @@
   (:require [clojure.test :refer :all]
             [clojure.pprint :refer :all]
             [space-wars.bowyer-watson :refer :all]
+            [space-wars.monit :refer :all]
             [clojure.set :refer :all]))
 
 (defn random-points [] (cons (space-wars.bowyer-watson/point (rand-int 800) (rand-int 600)) (lazy-seq (random-points))))
-(def points (into #{} (conj (take 1 (random-points)) (point 0 0) (point 800 0) (point 0 600) (point 800 600))))
+(def points (into #{} (conj (take 500 (random-points)) (point 0 0) (point 800 0) (point 0 600) (point 800 600))))
 
 (defrecord timeholder [start operations stop])
 (defn start [] (timeholder. (new java.util.concurrent.atomic.AtomicLong (System/nanoTime))
@@ -24,16 +25,15 @@
 
 
 
-(println)
-(def t (start))
-(defn u [] (update t) u)
-(comment (bowyer-watson_2d points :boundries (triangle (point -100000 -100000) (point 100000 -100000) (point 0 100000))
-                  :timer-fn u)
-(stop t)
-(println (as-str t))
+(def mo (atom-map-monit))
+(def mf (monit-fn mo))
+
+(bowyer-watson_2d points :boundries (triangle (point -100000 -100000) (point 100000 -100000) (point 0 100000)) :timer-monitor mf)
+
+(println mo)
 
 (def graph (as-graph (bowyer-watson_2d points :boundries (triangle (point -100000 -100000) (point 100000 -100000) (point 0 100000)))
                      :edge-filter (let [exclude #{(point -100000 -100000) (point 100000 -100000) (point 0 100000)}] ;;same points as in bowyer-watson_2d boundry
                                                 (fn [e] (not (or (contains? exclude (:p1 e))
-                                                                 (contains? exclude (:p2 e)))))))))
+                                                                 (contains? exclude (:p2 e))))))))
 
