@@ -92,7 +92,7 @@
 
 (defn bowyer-watson_2d [points & {:keys [boundries timer-monitor]
                                   :or {boundries (triangle (point -100 -100) (point 100 -100) (point 0 100))
-                                       timer-monitor monit-nil}}]
+                                       timer-monitor nil-monit}}]
   (loop [triangles #{boundries}
          points points]
     (if (empty? points) triangles ;; end of points - stop condition
