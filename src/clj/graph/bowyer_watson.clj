@@ -1,6 +1,6 @@
-(ns space-wars.bowyer-watson
+(ns graph.bowyer-watson
   (:require [clojure.set :refer :all])
-  (:require [space-wars.monit :refer :all])
+  (:require [util.monit :refer :all])
   (:gen-class))
 
 (defn- cmp [x y] (if (< x y) -1 (if (> x y) 1 0)))
@@ -69,16 +69,16 @@
   (map #(triangle point %) edges))
 
 (defn- timmed-frequencies [timer-monitor arg]
-      (timer (frequencies arg) timer-monitor))
+  (timer (frequencies arg) timer-monitor))
 
 (defmacro timed
   ([timer-monitor func arg]
-  `(timer (~func ~arg) ~timer-monitor))
+   `(timer (~func ~arg) ~timer-monitor))
   ([timer-monitor func farg arg]
-  `(timer (~func ~farg ~arg) ~timer-monitor)))
+   `(timer (~func ~farg ~arg) ~timer-monitor)))
 
 (defn- timmed-reduce [timer-monitor arg]
-      (timer (reduce arg) timer-monitor))
+  (timer (reduce arg) timer-monitor))
 
 (defn- boundry-edges [triangles timer-monitor]
   (->> triangles

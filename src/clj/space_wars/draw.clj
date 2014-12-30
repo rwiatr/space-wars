@@ -1,5 +1,5 @@
 (ns space-wars.draw
-  (:require [space-wars.bowyer-watson :refer :all]
+  (:require [graph.bowyer-watson :refer :all]
             [quil.core :as q])
   (:gen-class))
 

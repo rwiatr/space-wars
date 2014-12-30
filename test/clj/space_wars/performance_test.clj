@@ -1,11 +1,12 @@
-(ns space-wars.performance-test
+(comment
+(ns graph.performance-test
   (:require [clojure.test :refer :all]
             [clojure.pprint :refer :all]
-            [space-wars.bowyer-watson :refer :all]
-            [space-wars.monit :refer :all]
-            [clojure.set :refer :all]))
+            [graph.bowyer-watson :refer :all]
+            [clojure.set :refer :all]
+            [util.monit :refer :all]))
 
-(defn random-points [] (cons (space-wars.bowyer-watson/point (rand-int 800) (rand-int 600)) (lazy-seq (random-points))))
+(defn random-points [] (cons (graph.bowyer-watson/point (rand-int 800) (rand-int 600)) (lazy-seq (random-points))))
 (def points (into #{} (conj (take 500 (random-points)) (point 0 0) (point 800 0) (point 0 600) (point 800 600))))
 
 (defrecord timeholder [start operations stop])
@@ -37,3 +38,4 @@
                                                 (fn [e] (not (or (contains? exclude (:p1 e))
                                                                  (contains? exclude (:p2 e))))))))
 
+)

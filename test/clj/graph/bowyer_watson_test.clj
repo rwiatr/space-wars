@@ -1,8 +1,8 @@
-(ns space-wars.bowyer-watson-test
+(ns graph.bowyer-watson-test
   (:require [clojure.test :refer :all]
             [clojure.pprint :refer :all]
-            [space-wars.bowyer-watson :refer :all]
-            [clojure.set :refer :all]))
+            [clojure.set :refer :all]
+            [graph.bowyer-watson :refer :all]))
 
 (deftest test-point2d
   (testing "compareTo when equal"
@@ -58,8 +58,8 @@
          (triangle (point 1 0) (edge (point 0 1) (point 0 0)))))
 
   (testing "illegal attributes"
-    (is (thrown-with-msg? IllegalArgumentException #"Duplicate key: space_wars.bowyer_watson.Point2d" (triangle (point 0 0) (point 0 0) (point 1 0))))
-    (is (thrown-with-msg? IllegalArgumentException #"Duplicate key: space_wars.bowyer_watson.Point2d" (triangle (point 0 0) (edge (point 0 0) (point 1 0)))))))
+    (is (thrown-with-msg? IllegalArgumentException #"Duplicate key: graph.bowyer_watson.Point2d" (triangle (point 0 0) (point 0 0) (point 1 0))))
+    (is (thrown-with-msg? IllegalArgumentException #"Duplicate key: graph.bowyer_watson.Point2d" (triangle (point 0 0) (edge (point 0 0) (point 1 0)))))))
 
 (deftest test-circumcircle-center
   (testing "center point"

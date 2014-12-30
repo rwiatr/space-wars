@@ -1,12 +1,5 @@
-(ns space-wars.monit
+(ns util.monit
   (:gen-class))
-
-(defmacro timer [exec monit]
-  `(let [start# (System/nanoTime)
-         execution-result# ~exec
-         end# (System/nanoTime)]
-     (~monit '~exec (- end# start#))
-     execution-result#))
 
 (defprotocol Monitors
   (monit [this id t]))
@@ -22,6 +15,7 @@
               (str (format "TOTAL: %d\n" total)
                    (clojure.string/join "\n" (doall (map #(do [(format "%.10f" (double (/ (second %) total))) (first %)])
                                                          result)))))))
+;; API
 
 (defn atom-map-monit []
   (AtomMapMonitors. (atom {})))
@@ -31,14 +25,9 @@
 (defn monit-fn [monitor]
   (fn [id t] (monit monitor id t)))
 
-
-(def monitor (atom-map-monit))
-(def monitor-fn (monit-fn monitor))
-(macroexpand '(timer (str "123" "123") monitor-fn))
-(def timer-code (timer (str "123" "123") monitor-fn))
-(def timer-code (timer (str "123") monitor-fn))
-
-(def nul nil)
-(macroexpand '(timer (str "1") nul))
-
-monitor
+(defmacro timer [exec monit]
+  `(let [start# (System/nanoTime)
+         execution-result# ~exec
+         end# (System/nanoTime)]
+     (~monit '~exec (- end# start#))
+     execution-result#))
