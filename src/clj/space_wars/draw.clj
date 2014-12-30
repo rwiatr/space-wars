@@ -8,7 +8,7 @@
   (q/frame-rate 1)                    ;; Set framerate to 1 FPS
   (q/background 0))                 ;; Set the background colour to
                                       ;; a nice shade of grey.
-(defn random-points [] (cons (space-wars.bowyer-watson/point (rand-int 800) (rand-int 600)) (lazy-seq (random-points))))
+(defn random-points [] (cons (graph.bowyer-watson/point (rand-int 800) (rand-int 600)) (lazy-seq (random-points))))
 
 
 (def points (take 20 (random-points))); (point 0 0) (point 800 0) (point 0 600) (point 800 600)))
