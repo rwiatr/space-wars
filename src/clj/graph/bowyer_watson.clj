@@ -169,7 +169,7 @@
   ([pred nodes ignored neighbour-fn head-fn]
    (loop [nodes nodes]
      (let [node (first nodes)]
-       (cond (empty? nodes) nil; EOF seq
+       (cond (empty? nodes) nil ; EOF seq
              (contains? ignored node) (recur (rest nodes)) ;try next node
              :else (cons (head-fn node pred)
                          (lazy-seq (breath-first-seq-impl
@@ -185,13 +185,3 @@
    (case option
      :predecessors (breath-first-seq-impl node neighbour-fn (fn [node pred] [node pred]))
      :nodes-only (breath-first-seq-impl node neighbour-fn (fn [node pred] node)))))
-
-(take 12 (breath-first-seq 'a (fn [x] (let [result (cond (= x 'a) '(b c q)
-                                                         (= x 'q) '()
-                                                         (= x 'b) '(d)
-                                                         (= x 'c) '(e)
-                                                         (= x 'e) '(a f)
-                                                         (= x 'd) '(b)
-                                                         (= x 'f) '())]
-                                        result)) :predecessors))
-
