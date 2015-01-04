@@ -1,78 +1,14 @@
 (ns graph.bowyer-watson
-  (:require [clojure.set :refer :all])
-  (:require [util.monit :refer :all])
+  (:require [clojure.set :refer :all]
+            [graph.geometries :refer :all]
+            [util.monit :refer :all])
   (:gen-class))
-
-(defn- cmp [x y] (if (< x y) -1 (if (> x y) 1 0)))
-(defn- cmpp [p1 p2] (let [dx (cmp (:x p1) (:x p2))
-                          dy (cmp (:y p1) (:y p2))]
-                      (if (zero? dx) dy dx)))
-
-(defrecord Point2d [x y]
-  java.lang.Comparable
-  (compareTo [this other] (cmpp this other)))
-
-
-(defn point[x y] (Point2d. x y))
-
-(defrecord Edge[p1 p2])
-
-(defn edge [p1 p2]
-  (let [comparision (.compareTo p1 p2)]
-    (if (zero? comparision)
-      nil
-      (if (> 0 (.compareTo p1 p2))
-        (Edge. p1 p2)
-        (Edge. p2 p1)))))
-
-(defrecord Circumcircle [p r])
-
-(defn distance [x y]
-  (let [a (- (:x x) (:x y))
-        b (- (:y x) (:y y))]
-    (java.lang.Math/sqrt (+ (* a a) (* b b)))))
 
 (defmacro timed
   ([timer-monitor func arg]
    `(timer (~func ~arg) ~timer-monitor))
   ([timer-monitor func farg arg]
    `(timer (~func ~farg ~arg) ~timer-monitor)))
-
-(defn circumcircle-p
-  ([t] (circumcircle-p (:p1 t) (:p2 t) (:p3 t)))
-  ([p1 p2 p3]
-   (let [a1 (- (:x p1) (:x p2))
-         b1 (- (:y p1) (:y p2))
-         c1 (- (+ (* a1 (/ (+ (:x p1) (:x p2)) 2)) (* b1 (/ (+ (:y p1) (:y p2)) 2))))
-
-         a2 (- (:x p2) (:x p3))
-         b2 (- (:y p2) (:y p3))
-         c2 (- (+ (* a2 (/ (+ (:x p2) (:x p3)) 2)) (* b2 (/ (+ (:y p2) (:y p3)) 2))))]
-     (point (/ (- (* c2 b1) (* c1 b2)) (- (* a1 b2) (* a2 b1)))
-            (/ (- (* a2 c1) (* a1 c2)) (- (* a1 b2) (* a2 b1)))))))
-
-(defn circumcircle
-  ([t] (circumcircle (:p1 t) (:p2 t) (:p3 t)))
-  ([p1 p2 p3]
-   (let [c (circumcircle-p p1 p2 p3)]
-     (Circumcircle. c (distance c p1)))))
-
-(defrecord Triangle [p1 p2 p3 edges c])
-
-(defn triangle
-  ([p1 p2 p3]
-   (let [points #{p1 p2 p3} ;; ensure unique
-         edges  #{(edge p1 p2) (edge p2 p3) (edge p3 p1)}]
-     (Triangle. (first points) (second points) (last points) edges (circumcircle p1 p2 p3))))
-
-  ([p e]
-   (let [points #{p (:p1 e) (:p2 e)} ;; ensure unique
-         edges  #{e (edge p (:p1 e)) (edge p (:p2 e))}
-         [p1 p2 p3] [(first points) (second points) (last points)]]
-     (Triangle. p1 p2 p3 edges (circumcircle p1 p2 p3)))))
-
-(defn- recreate [point edges]
-  (map #(triangle point %) edges))
 
 (defn- timmed-frequencies [timer-monitor arg]
   (timer (frequencies arg) timer-monitor))
@@ -86,6 +22,9 @@
        (frequencies)
        (filter #(= (second %) 1))
        (map key)))
+
+(defn- recreate [point edges]
+  (map #(triangle point %) edges))
 
 (defn- triangles-with-intersecting-circumcircle [point triangles]
   (filter #(not (> (distance (:p (:c %)) point) (:r (:c %)))) triangles))
@@ -112,74 +51,57 @@
   ([mm k v & kvs]
    (apply add (add mm k v) kvs)))
 
-(defn- point-to-triangles-index [triangles]
-  (->> triangles
-       (map #("TEST"))
-       (reduce #(merge-with conj %1 %2) {})))
+(defn- neighbours [triangle triangles]
+  (filter (fn [neighbour] (empty? (clojure.set/intersection (:edges triangle) (:edges neighbour)))) triangles))
 
-(point-to-triangles-index [(triangle (point 0 100) (point -100 -100) (point 0 25))
-                           (triangle (point 100 -100) (point -100 -100) (point 48 0))
-                           (triangle (point 0 25) (point -100 -100) (point 48 0))
-                           (triangle (point 0 100) (point 100 -100) (point 48 0))
-                           (triangle (point 0 100) (point 0 25) (point 48 0))])
+(defn as-voronoi-diagram [triangles & {:keys [connect
+                                              graph
+                                              edge-filter]
+                                       :or {connect (fn [graph p1 p2 cell-keys]
+                                                      (let [g (or graph {})]
+                                                        (-> graph
+                                                            (add p1 p2)
+                                                            (add p2 p1))))
+                                            graph {}
+                                            edge-filter (let [exclude #{(point -100 -100) (point 100 -100) (point 0 100)}] ;;same points as in bowyer-watson_2d boundry
+                                                          (fn [e] (not (or (contains? exclude (:p1 e))
+                                                                           (contains? exclude (:p2 e))))))}}]
+  (loop [triangles triangles
+         graph graph]
+    (if-let [triangle (first triangles)]
+      (let [newGraph (loop [neighbours (rest triangles)
+                            graph graph]
+                       (if-let [neighbour (first neighbours)]
+                         (if-let [edge (first (clojure.set/intersection (:edges triangle) (:edges neighbour)))]
+                           (recur (rest neighbours) (connect graph
+                                                             (-> triangle :c :p)
+                                                             (-> neighbour :c :p)
+                                                             (list (:p1 edge) (:p2 edge))))
+                           (recur (rest neighbours) graph))
+                         graph))]
+        (recur (rest triangles) newGraph))
+      graph)))
 
-(defn as-cells [triangles]
-  (let [indx (seq (point-to-triangles-index triangles))]
-    (map make-cell
-         (defn- neighbours [triangle triangles]
-           (filter (fn [neighbour] (empty? (clojure.set/intersection (:edges triangle) (:edges neighbour)))) triangles))
-
-         (defn- neighbour-index [triangles]
-           (index (fn [triangle] (neighbours triangle triangles)) triangles))
-
-         (defn as-voronoi-diagram [triangles & {:keys [connect
-                                                       graph
-                                                       edge-filter]
-                                                :or {connect (fn [graph p1 p2 cell-keys]
-                                                               (let [g (or graph {})]
-                                                                 (-> graph
-                                                                     (add p1 p2)
-                                                                     (add p2 p1))))
-                                                     graph {}
-                                                     edge-filter (let [exclude #{(point -100 -100) (point 100 -100) (point 0 100)}] ;;same points as in bowyer-watson_2d boundry
-                                                                   (fn [e] (not (or (contains? exclude (:p1 e))
-                                                                                    (contains? exclude (:p2 e))))))}}]
-           (loop [triangles triangles
-                  graph graph]
-             (if-let [triangle (first triangles)]
-               (let [newGraph (loop [neighbours (rest triangles)
-                                     graph graph]
-                                (if-let [neighbour (first neighbours)]
-                                  (if-let [edge (first (clojure.set/intersection (:edges triangle) (:edges neighbour)))]
-                                    (recur (rest neighbours) (connect graph
-                                                                      (-> triangle :c :p)
-                                                                      (-> neighbour :c :p)
-                                                                      (list (:p1 edge) (:p2 edge))))
-                                    (recur (rest neighbours) graph))
-                                  graph))]
-                 (recur (rest triangles) newGraph))
-               graph)))
-
-         (defn as-graph [triangles & {:keys [connect
-                                             graph
-                                             edge-filter]
-                                      :or {connect (fn [graph p1 p2]
-                                                     (let [g (or graph {})]
-                                                       (-> graph
-                                                           (add p1 p2)
-                                                           (add p2 p1))))
-                                           graph {}
-                                           edge-filter (let [exclude #{(point -100 -100) (point 100 -100) (point 0 100)}] ;;same points as in bowyer-watson_2d boundry
-                                                         (fn [e] (not (or (contains? exclude (:p1 e))
-                                                                          (contains? exclude (:p2 e))))))}}]
-           (loop [edges (->> triangles
-                             (map :edges)
-                             (reduce concat)
-                             (into #{})
-                             (filter edge-filter))
-                  graph graph]
-             (if (empty? edges) graph
-               (recur (rest edges)
-                      (connect graph
-                               (:p1 (first edges))
-                               (:p2 (first edges)))))))
+(defn as-graph [triangles & {:keys [connect
+                                    graph
+                                    edge-filter]
+                             :or {connect (fn [graph p1 p2]
+                                            (let [g (or graph {})]
+                                              (-> graph
+                                                  (add p1 p2)
+                                                  (add p2 p1))))
+                                  graph {}
+                                  edge-filter (let [exclude #{(point -100 -100) (point 100 -100) (point 0 100)}] ;;same points as in bowyer-watson_2d boundry
+                                                (fn [e] (not (or (contains? exclude (:p1 e))
+                                                                 (contains? exclude (:p2 e))))))}}]
+  (loop [edges (->> triangles
+                    (map :edges)
+                    (reduce concat)
+                    (into #{})
+                    (filter edge-filter))
+         graph graph]
+    (if (empty? edges) graph
+      (recur (rest edges)
+             (connect graph
+                      (:p1 (first edges))
+                      (:p2 (first edges)))))))
