@@ -1,8 +1,9 @@
 (ns graph.bowyer-watson_test
   (:require [clojure.test :refer :all]
-            [clojure.pprint :refer :all]
             [clojure.set :refer :all]
-            [graph.geometries :refer :all]
+            [geom.triangle :refer [triangle]]
+            [geom.edge :refer [edge]]
+            [geom.point :refer [point distance]]
             [graph.bowyer-watson :refer :all]))
 
 (defn- sets-equal [expected actual]

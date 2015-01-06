@@ -1,6 +1,8 @@
 (ns graph.bowyer-watson
   (:require [clojure.set :refer :all]
-            [graph.geometries :refer :all]
+            [geom.triangle :refer [triangle]]
+            [geom.edge :refer [edge]]
+            [geom.point :refer [point distance]]
             [util.monit :refer :all])
   (:gen-class))
 

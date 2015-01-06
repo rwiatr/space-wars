@@ -1,7 +1,7 @@
 (ns graph.converters
   (:require [clojure.set :refer :all]
-            [graph.mapgraph :refer [node]]
-            [graph.geometries :refer [triangle point]]))
+            [graph.mapgraph :refer [property-node]]
+            [graph.geometries :refer [triangle point polygon]]))
 
 (defn- point->triangles [triangles]
   (->> triangles
@@ -10,26 +10,36 @@
                      (:p3 t) (list t)}))
        (reduce #(merge-with concat %1 %2))))
 
+(defn- point->points [point->triangles-indx]
+  (into {} (for [[k v] m] [k (fn [triangles] (into #{}))])))
+
 (defn- neighbours [triangle triangles]
   (filter (fn [neighbour] (empty? (clojure.set/intersection (:edges triangle) (:edges neighbour)))) triangles))
 
 (defn- neighbour-index [triangles]
   (index (fn [triangle] (neighbours triangle triangles)) triangles))
 
+(defn- as-ordered-points [triangles]
+  (loop [triangles triangles
+         points ()]
+    (if (empty? triangles) points
+      (let [triangle (first triangles)]
+        (if-let [other (neighbours triangle triangles)]
+          (recur (rest triangles)
+                 (cons (->> triangle :c :p) points))
+          points)))))
 
-(defn- append [mm k v] (assoc mm k (conj (get mm k #{}) v)))
-(defn- appendMulti [mm k vs] (reduce #(append %1 k %2) mm vs))
-(defn- appendBetween [mm ks] (reduce (fn [mm k]
-                                       (appendMulti mm k (filter (not (= k)) ks)))
-                                     mm
-                                     ks))
-(defn- connect [graph nodes]
-  (appendBetween graph nodes))
+(defn- an-node [triangles]
+  (->> triangles
+       as-ordered-points
+       polygon
+       #(assoc {} :geometry %)
+       property-node))
 
-(defn- as-nodes [triangles & {:keys [graph connect-fn] :or [graph {} connect-fn connect]}]
+(defn- as-nodes [triangles & {:keys [graph connect-fn] :or {graph {} connect-fn graph.mapgraph/connect-all}}]
   (let [indx (point->triangles triangles)]
     (->> (vals indx) ; [point (triangles)]
-         (map (connect graph #(second %))))))
+         (map as-node))))
 
 (defn as-graph "converts triangles produced by bowyers watson algorithm into graph" [triangles] (into #{} (as-nodes triangles)))
 
@@ -38,5 +48,3 @@
           (triangle (point 0 25) (point -100 -100) (point 48 0))
           (triangle (point 0 100) (point 100 -100) (point 48 0))
           (triangle (point 0 100) (point 0 25) (point 48 0))})
-
-(as-nodes ts :graph {} :connect-fn connect)

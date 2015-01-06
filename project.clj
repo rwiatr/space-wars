@@ -5,6 +5,7 @@
                  [quil "2.2.4"]
   ;               [rm-hull/monet "0.2.1"]
                  [org.clojure/clojure "1.6.0"]
+                 [org.clojure/algo.generic "0.1.2"]
   ;               [org.clojure/clojurescript "0.0-2371"
   ;                :exclusions [org.apache.ant/ant]]
                  ]
