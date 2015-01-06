@@ -22,6 +22,10 @@
     (is (thrown-with-msg? IllegalArgumentException #"Duplicate key: .*\.Point2d" (triangle (point 0 0) (point 0 0) (point 1 0))))
     (is (thrown-with-msg? IllegalArgumentException #"Duplicate key: .*\.Point2d" (triangle (point 0 0) (edge (point 0 0) (point 1 0)))))))
 
+(deftest test.points
+  (testing "triangle equality"
+    (is (list (point 0 0) (point 0 1) (point 1 0)) (= (triangle (point 0 0) (point 0 1) (point 1 0))))))
+
 (deftest test.circumcircle
   (testing "center point"
     (is (= (point 0 0) (circumcircle-p (triangle (point -1 0) (point 1 0) (point 0 1)))))

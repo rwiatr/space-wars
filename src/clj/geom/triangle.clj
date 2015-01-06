@@ -23,6 +23,8 @@
    (let [c (circumcircle-p p1 p2 p3)]
      (circle c (distance c p1)))))
 
+(defn points [triangle] (list (:p1 triangle) (:p2 triangle) (:p3 triangle)))
+
 (defrecord Triangle [p1 p2 p3 edges c])
 (defn triangle
   ([p1 p2 p3]

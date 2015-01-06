@@ -1,7 +1,11 @@
 (ns graph.converters
   (:require [clojure.set :refer :all]
+            [clojure.algo.generic.functor :refer [fmap]]
             [graph.mapgraph :refer [property-node]]
-            [graph.geometries :refer [triangle point polygon]]))
+            [geom.point :refer [point]]
+            [geom.triangle :refer [triangle points]]
+            [geom.polygon :refer [polygon]]))
+
 
 (defn- point->triangles [triangles]
   (->> triangles
@@ -10,8 +14,7 @@
                      (:p3 t) (list t)}))
        (reduce #(merge-with concat %1 %2))))
 
-(defn- point->points [point->triangles-indx]
-  (into {} (for [[k v] m] [k (fn [triangles] (into #{}))])))
+(defn- point->points [point->triangles-indx] (fmap #(mapcat points %)))
 
 (defn- neighbours [triangle triangles]
   (filter (fn [neighbour] (empty? (clojure.set/intersection (:edges triangle) (:edges neighbour)))) triangles))
@@ -29,7 +32,7 @@
                  (cons (->> triangle :c :p) points))
           points)))))
 
-(defn- an-node [triangles]
+(defn- as-node [triangles]
   (->> triangles
        as-ordered-points
        polygon
@@ -40,6 +43,8 @@
   (let [indx (point->triangles triangles)]
     (->> (vals indx) ; [point (triangles)]
          (map as-node))))
+
+(defn-
 
 (defn as-graph "converts triangles produced by bowyers watson algorithm into graph" [triangles] (into #{} (as-nodes triangles)))
 

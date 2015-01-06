@@ -6,6 +6,8 @@
 (defn- appendBetween [mm ks] (reduce (fn [mm k] (appendMulti mm k (filter #(not (= k %)) ks))) mm ks))
 (defn connect-all [graph nodes] (appendBetween graph nodes))
 
+(defn graph[] {})
+
 (deftype PropertyNode [properties-map]
   clojure.lang.ILookup
   (valAt [this item] (get properties-map item))
