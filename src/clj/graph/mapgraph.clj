@@ -1,12 +1,10 @@
 (ns graph.mapgraph
   (:gen-class))
 
-(defn- append [mm k v] (assoc mm k (conj (get mm k #{}) v)))
-(defn- appendMulti [mm k vs] (reduce #(append %1 k %2) mm vs))
-(defn- appendBetween [mm ks] (reduce (fn [mm k] (appendMulti mm k (filter #(not (= k %)) ks))) mm ks))
-(defn connect-all [graph nodes] (appendBetween graph nodes))
+(defn- joinBetween [mm ks] (reduce (fn [mm k] (util.set_multimap/add mm k (filter #(not (= k %)) ks))) mm ks))
+(defn connect-all [graph nodes] (joinBetween graph nodes))
 
-(defn graph[] {})
+(defn graph[] (util.set_multimap/multimap))
 
 (deftype PropertyNode [properties-map]
   clojure.lang.ILookup
