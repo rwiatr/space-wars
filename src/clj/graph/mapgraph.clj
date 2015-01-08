@@ -1,7 +1,12 @@
 (ns graph.mapgraph
   (:gen-class))
 
-(defn- joinBetween [mm ks] (reduce (fn [mm k] (util.set_multimap/add mm k (filter #(not (= k %)) ks))) mm ks))
+(defn- joinBetween [mm ks]
+  (reduce
+   (fn [mm k]
+     (util.set_multimap/addseq mm k (filter #(not (= k %)) ks)))
+   mm ks))
+
 (defn connect-all [graph nodes] (joinBetween graph nodes))
 
 (defn graph[] (util.set_multimap/multimap))

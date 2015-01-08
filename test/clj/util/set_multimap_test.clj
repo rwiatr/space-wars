@@ -28,4 +28,20 @@
     (is (= {} (del (add (multimap) :k1 :v1) :k1 :v1))))
   (testing "test add sequence"
     (is (= {:k1 #{:v1 :v2}} (addseq (multimap) :k1 [:v1 :v1 :v2])))
-    (is (= {:k1 #{:v1 :v2 :v3}} (addseq (multimap) :k1 [:v1 :v2 :v3])))))
+    (is (= {:k1 #{:v1 :v2 :v3}} (addseq (multimap) :k1 [:v1 :v2 :v3]))))
+  (testing "reverse multimap"
+    (is (empty? (mm-reverse (multimap))))
+    (is (= {:v1 #{:k1}} (mm-reverse (add (multimap) :k1 :v1))))
+    (is (= {:v1 #{:k1} :v2 #{:k1}} (mm-reverse (add (multimap) :k1 :v1 :k1 :v2)))))
+  (testing "mm-index"
+    (is (= {true #{1 3} false #{0 2}} (mm-index odd? [0 1 2 3])))
+    (is (= {true #{2 4} false #{1 3}} (mm-index (multimap) odd? (partial + 1) [0 1 2 3])))
+    (is (= {true #{1 3} false #{0 2} nil #{'k}} (mm-index (add (multimap) nil 'k) odd? [0 1 2 3])))
+    (is (= {:v1 #{:k1} :v2 #{:k1}} (mm-reverse (add (multimap) :k1 :v1 :k1 :v2)))))
+  (testing "mm-fmap"
+    (is (= {true #{4 2} false #{1 3}} (mm-fmap (partial + 1) (mm-index odd? [0 1 2 3]))))
+    (is (= {true #{'(3 4) '(1 2)}, false #{'(2 3) '(0 1)}} (mm-fmap #(list % (+ 1 %)) (mm-index odd? [0 1 2 3])))))
+  (testing "mm-fmap with different mapper"
+    (is (= {true #{1 4 3 2} false #{0 1 3 2}} (mm-fmap #(list % (+ 1 %)) (mm-index odd? [0 1 2 3]) mapcat))))
+  (testing "mm-to-map"
+    (is (= {true 4 false 2} (mm-to-map (partial reduce +) (mm-index odd? [0 1 2 3]))))))
