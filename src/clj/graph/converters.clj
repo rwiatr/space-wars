@@ -2,7 +2,7 @@
   (:require [clojure.set :refer :all]
             [clojure.algo.generic.functor :refer [fmap]]
             [graph.mapgraph :refer [property-node]]
-            [util.set_multimap :refer [mm-reverse mm-index mm-merge mm-to-map mm-fmap mm-kv-fmap]]
+            [util.set_multimap :refer [mm-reverse mm-index mm-merge mm-to-map mm-fmap mm-kv-fmap mm-filter del]]
             [geom.point :refer [point]]
             [geom.triangle :refer [triangle points to-circumcircle-center]]
             [geom.polygon :refer [polygon]]))
@@ -30,8 +30,7 @@
   (->> triangles
        as-ordered-points
        polygon
-       (assoc {} :geometry)
-       property-node))
+       (assoc {} :geometry)))
 
 (defn point->triangles [triangles]
   (mm-merge (mm-index #(:p1 %) triangles)
@@ -45,11 +44,12 @@
   (mm-kv-fmap #(filter (partial not= %1) (points %2)) point->triangles-indx mapcat))
 
 (defn polygon->polygons [point->points-indx
-                          point->polygon-indx]
-   (->> point->points-indx
-        (mm-fmap #(get point->polygon-indx %))
-        (mm-reverse)
-        (mm-fmap #(get point->polygon-indx %))))
+                         point->polygon-indx]
+  (->> point->points-indx
+       (mm-fmap #(get point->polygon-indx %))
+       (mm-reverse)
+       (mm-fmap #(get point->polygon-indx %))
+       (mm-filter some?)))
 
 (defn as-graph "converts triangles produced by bowyers watson algorithm into graph" [triangles]
   (let [point->triangles-indx (point->triangles triangles)
