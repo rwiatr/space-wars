@@ -1,14 +1,17 @@
 (defproject space-wars "0.1.0-SNAPSHOT"
   :source-paths ["src/clj"]
   :test-paths   ["test/clj"]
-  :dependencies [
+
+  :dependencies [[pjstadig/humane-test-output "0.6.0"]
                  [quil "2.2.4"]
-  ;               [rm-hull/monet "0.2.1"]
+                 ;               [rm-hull/monet "0.2.1"]
                  [org.clojure/clojure "1.6.0"]
                  [org.clojure/algo.generic "0.1.2"]
-  ;               [org.clojure/clojurescript "0.0-2371"
-  ;                :exclusions [org.apache.ant/ant]]
+                 ;               [org.clojure/clojurescript "0.0-2371"
+                 ;                :exclusions [org.apache.ant/ant]]
                  ]
+  :injections [(require 'pjstadig.humane-test-output)
+               (pjstadig.humane-test-output/activate!)]
   ;:hooks [leiningen.cljsbuild]
   ;:plugins [[lein-cljsbuild "1.0.3"]]
   :plugins [[lein-cloverage "1.0.2"]]

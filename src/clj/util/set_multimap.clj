@@ -36,11 +36,24 @@
 (defn mm-reverse [mm]
   (reduce mm-reverse-row (multimap) (seq mm)))
 
+(defn mm-kv-fmap
+  ([f mm] (mm-kv-fmap f mm map))
+  ([f mm mapper] ; use if f returns a collection that has to be merged with mapcat
+   (into {} (for [[k vs] mm
+                  :let [nvs (into #{} (mapper #(f k %) vs))]
+                  :when (not-empty nvs)] [k nvs]))))
 (defn mm-fmap
   ([f mm]
    (mm-fmap f mm map))
-  ([f mm mapper] ; use if f returns a collection that has to be merged with mapcat
-   (fmap #(into #{} (mapper f %)) mm)))
+  ([f mm mapper] ; use if f returns a collection that has to be merged with mapcat or theres need to use filtering
+   (let [nm (fmap #(into #{} (mapper f %)) mm)]
+     (select-keys nm (for [[k vs] nm :when (not-empty vs)] k)))))
+
+(defn mm-filter [f mm]
+  (mm-fmap f mm filter))
+
+(defn mm-kv-filter [f mm]
+  (mm-kv-fmap f mm filter))
 
 (defn mm-to-map [f mm]
   (fmap f mm))

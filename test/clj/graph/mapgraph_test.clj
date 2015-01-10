@@ -1,6 +1,6 @@
-(ns graph.traversal-test
+(ns graph.mapgraph
   (:require [clojure.test :refer :all]
-            [graph.traversal :refer :all]))
+            [graph.mapgraph :refer :all]))
 
 (deftest test.mapgraph
   (testing "is empty when no elements added"

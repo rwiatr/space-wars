@@ -37,3 +37,8 @@
          edges  #{e (edge p (:p1 e)) (edge p (:p2 e))}
          [p1 p2 p3] [(first points) (second points) (last points)]]
      (Triangle. p1 p2 p3 edges (circumcircle p1 p2 p3)))))
+
+(defn to-circumcircle [t] (->> t :c))
+(defn to-circumcircle-center [t] (->> t :c :p))
+(defn to-circumcircles [ts] (map to-circumcircle ts))
+(defn to-circumcircles-centers [ts] (map to-circumcircle-center ts))

@@ -43,5 +43,16 @@
     (is (= {true #{'(3 4) '(1 2)}, false #{'(2 3) '(0 1)}} (mm-fmap #(list % (+ 1 %)) (mm-index odd? [0 1 2 3])))))
   (testing "mm-fmap with different mapper"
     (is (= {true #{1 4 3 2} false #{0 1 3 2}} (mm-fmap #(list % (+ 1 %)) (mm-index odd? [0 1 2 3]) mapcat))))
+  (testing "mm-filter"
+    (is (= {true #{1 3} false #{2}} (mm-filter #(not (zero? %)) (mm-index odd? [0 1 2 3]))))
+    (is (= {false #{0}} (mm-filter (partial = 0) (mm-index odd? [0 1 2 3])))))
+  (testing "mm-kv-fmap"
+    (is (= {true #{4 2} false #{0 2}} (mm-kv-fmap #(if %1 (+ 1 %2) %2) (mm-index odd? [0 1 2 3]))))
+    (is (= {true #{'(3 4) '(1 2)}, false #{'(2 2) '(0 0)}} (mm-kv-fmap #(list %2 (if %1 (+ 1 %2) %2)) (mm-index odd? [0 1 2 3])))))
+  (testing "mm-kv-fmap with different mapper"
+    (is (= {true #{1 4 3 2} false #{0 2}} (mm-kv-fmap #(list %2 (if %1 (+ 1 %2) %2)) (mm-index odd? [0 1 2 3]) mapcat)))
+    (is (= {true #{1 3}} (mm-kv-fmap #(if %1 (list %2) (list)) (mm-index odd? [0 1 2 3]) mapcat))))
+  (testing "mm-kv-filter"
+    (is (= {true #{1}} (mm-kv-filter #(and (not (= %2 3)) %1) (mm-index odd? [0 1 2 3])))))
   (testing "mm-to-map"
     (is (= {true 4 false 2} (mm-to-map (partial reduce +) (mm-index odd? [0 1 2 3]))))))
