@@ -55,4 +55,9 @@
   (testing "mm-kv-filter"
     (is (= {true #{1}} (mm-kv-filter #(and (not (= %2 3)) %1) (mm-index odd? [0 1 2 3])))))
   (testing "mm-to-map"
-    (is (= {true 4 false 2} (mm-to-map (partial reduce +) (mm-index odd? [0 1 2 3]))))))
+    (is (= {true 4 false 2} (mm-to-map (partial reduce +) (mm-index odd? [0 1 2 3])))))
+  (testing "mm-seq"
+    (is (= (list [:k2 :v2] [:k1 :v1]) (mm-seq (add (multimap) :k1 :v1 :k2 :v2))))
+    (is (= (list [:k1 :v2] [:k1 :v1]) (mm-seq (add (multimap) :k1 :v1 :k1 :v2))))
+    (is (= (list) (mm-seq (multimap))))))
+

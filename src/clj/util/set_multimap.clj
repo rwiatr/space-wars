@@ -55,5 +55,18 @@
 (defn mm-kv-filter [f mm]
   (mm-kv-fmap f mm filter))
 
+
+(defn- mm-seq-impl [kvs k vs]
+  (cond
+   (not-empty vs) (cons [k (first vs)] (lazy-seq (mm-seq-impl kvs k (rest vs))))
+   (not-empty kvs) (let [p (first kvs)] (recur (rest kvs) (first p) (second p)))
+   :else nil))
+
+(defn mm-seq [mm]
+  (let [kvs (seq mm)]
+    (if-let [pair (first kvs)]
+      (mm-seq-impl (rest kvs) (first pair) (second pair))
+      '())))
+
 (defn mm-to-map [f mm]
   (fmap f mm))
