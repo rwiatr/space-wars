@@ -64,8 +64,8 @@
 
 (defn mm-seq [mm]
   (let [kvs (seq mm)]
-    (if-let [pair (first kvs)]
-      (mm-seq-impl (rest kvs) (first pair) (second pair))
+    (if-let [p (first kvs)]
+      (mm-seq-impl (rest kvs) (first p) (second p))
       '())))
 
 (defn mm-to-map [f mm]
