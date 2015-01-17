@@ -2,7 +2,7 @@
   (:require [graph.bowyer-watson :refer :all]
             [quil.core :as q])
   (:gen-class))
-
+(comment
 (defn setup []
   (q/smooth)                          ;; Turn on anti-aliasing
   (q/frame-rate 1)                    ;; Set framerate to 1 FPS
@@ -36,3 +36,4 @@
   :setup setup                        ;; Specify the setup fn
   :draw draw                          ;; Specify the draw fn
   :size [800 600])
+)

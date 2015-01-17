@@ -24,7 +24,10 @@
     (is (= {} (del (multimap) :k1)))
     (is (= {} (del (add (multimap) :k1 :v1) :k1)))
     (is (= {:k2 #{:v2}} (del (add (multimap) :k1 :v1 :k2 :v2) :k1)))
+    (is (= {:k2 #{:v2}} (del (add (multimap) :k2 :v2) :k1)))
     (is (= {:k1 #{:v2}} (del (add (multimap) :k1 :v1 :k1 :v2) :k1 :v1)))
+    (is (= {:k1 #{:v2}} (del (add (multimap) :k1 :v2) :k1 :v1)))
+    (is (= {} (del (add (multimap) :k1 :v1 :k1 :v2) :k1 :v1 :k1 :v2)))
     (is (= {} (del (add (multimap) :k1 :v1) :k1 :v1))))
   (testing "test add sequence"
     (is (= {:k1 #{:v1 :v2}} (addseq (multimap) :k1 [:v1 :v1 :v2])))

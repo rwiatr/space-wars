@@ -13,9 +13,6 @@
 (defn- neighbours [triangle triangles]
   (filter (partial neighbours? triangle) triangles))
 
-(defn- neighbour-index [triangles]
-  (index (fn [triangle] (neighbours triangle triangles)) triangles))
-
 (defn- as-ordered-points [triangles]
   (loop [triangles triangles
          points ()]
@@ -51,13 +48,8 @@
        (mm-fmap #(get point->polygon-indx %))
        (mm-filter some?)))
 
-(defn as-graph "converts triangles produced by bowyers watson algorithm into graph" [triangles]
+(defn as-graph "into-graph" [triangles]
   (let [point->triangles-indx (point->triangles triangles)
         point->points-indx (point->points point->triangles-indx)
         point->polygon-indx (point->polygon point->triangles-indx)]
     (polygon->polygons point->points-indx point->polygon-indx)))
-
-(def ts #{(triangle (point -100 -100) (point 100 -100) (point 0 0))
-          (triangle (point -100 -100) (point -100 100) (point 0 0))
-          (triangle (point 100 100) (point 100 -100) (point 0 0))
-          (triangle (point 100 100) (point -100 100) (point 0 0))})
