@@ -10,7 +10,7 @@
   (is (= #{} (clojure.set/difference actual expected)))
   (is (= #{} (clojure.set/difference expected actual))))
 
-(deftest test-bowyer-watson_2d
+(deftest test.bowyer-watson_2d
   (testing "counts"
     (is (= 3 (count (bowyer-watson_2d [(point 0 0)]))))
     (is (= 5 (count (bowyer-watson_2d [(point 0 0) (point 0 1)]))))
@@ -31,7 +31,18 @@
       (sets-equal actual expected)
       (sets-equal expected actual))))
 
-(deftest test-as-graph
+(deftest test.bw-standard-filter
+  (testing "filteres out triangles"
+    (is (empty? (bw-standard-filter [(triangle (point 1 0) (point 0 1) (point 100 -100))
+                                     (triangle (point 1 0) (point 0 1) (point -100 -100))
+                                     (triangle (point 1 0) (point 0 1) (point 0 100))])))
+    (is (empty? (bw-standard-filter [(triangle (point 1 0) (point 0 1) (point 100 -100))
+                                     (triangle (point 1 0) (point 0 1) (point -100 -100))
+                                     (triangle (point 1 0) (point 0 1) (point 0 100))]))))
+  (testing "does not filter out non border"
+    (is (not-empty (bw-standard-filter [(triangle (point 1 0) (point 0 1) (point 0 0))])))))
+
+(deftest test.as-graph
   (testing "standard graph"
     (is (= {(point 0 0) #{(point 0 1) (point 2 1)}
             (point 0 1) #{(point 0 0) (point 2 1)}

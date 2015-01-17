@@ -1,10 +1,20 @@
 (ns graph.bowyer-watson
   (:require [clojure.set :refer :all]
-            [geom.triangle :refer [triangle]]
+            [geom.triangle :refer [triangle points]]
             [geom.edge :refer [edge]]
             [geom.point :refer [point distance]]
             [util.monit :refer :all])
   (:gen-class))
+
+(defn- default-boundries
+  ([] (default-boundries 100))
+  ([r] [(point (- r) (- r)) (point r (- r)) (point 0 r)]))
+
+(defn bw-standard-filter
+  ([triangles] (bw-standard-filter 100 triangles))
+  ([r triangles]
+    (let [excluded (into #{} (default-boundries r))]
+    (filter #(not (some excluded (points %))) triangles))))
 
 (defmacro timed
   ([timer-monitor func arg]

@@ -50,6 +50,8 @@
             (point 2 1) #{(point 0 0) (point 1 2)}}
            (point->points (point->triangles [(triangle (point 0 0) (point 0 1) (point 1 0))
                                              (triangle (point 0 0) (point 2 1) (point 1 2))]))))))
+
+
 (deftest test.polygon->polygons
   (testing "polygon->polygons when a<->b and a and b different polygons"
     (is (= {:2 #{:1} :1 #{:2}} (polygon->polygons (add (multimap) :a :b :b :a) {:a :1 :b :2}))))
