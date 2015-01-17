@@ -75,7 +75,7 @@
                                                             (add p1 p2)
                                                             (add p2 p1))))
                                             graph {}
-                                            edge-filter (let [exclude #{(point -100 -100) (point 100 -100) (point 0 100)}] ;;same points as in bowyer-watson_2d boundry
+                                            edge-filter (let [exclude (into #{} (default-boundries))] ;;same points as in bowyer-watson_2d boundry
                                                           (fn [e] (not (or (contains? exclude (:p1 e))
                                                                            (contains? exclude (:p2 e))))))}}]
   (loop [triangles triangles
@@ -103,7 +103,7 @@
                                                   (add p1 p2)
                                                   (add p2 p1))))
                                   graph {}
-                                  edge-filter (let [exclude #{(point -100 -100) (point 100 -100) (point 0 100)}] ;;same points as in bowyer-watson_2d boundry
+                                  edge-filter (let [exclude (into #{} (default-boundries))] ;;same points as in bowyer-watson_2d boundry
                                                 (fn [e] (not (or (contains? exclude (:p1 e))
                                                                  (contains? exclude (:p2 e))))))}}]
   (loop [edges (->> triangles
