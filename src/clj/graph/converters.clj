@@ -2,7 +2,7 @@
   (:require [clojure.set :refer :all]
             [clojure.algo.generic.functor :refer [fmap]]
             [graph.mapgraph :refer [property-node]]
-            [util.set_multimap :refer [mm-reverse mm-index mm-merge mm-to-map mm-fmap mm-kv-fmap mm-filter del]]
+            [util.set_multimap :refer [mm-reverse mm-index mm-merge mm-to-map mm-fmap mm-kv-fmap mm-filter del mm-kv-filter]]
             [geom.point :refer [point]]
             [geom.triangle :refer [triangle points to-circumcircle-center]]
             [geom.polygon :refer [polygon]]))
@@ -48,8 +48,11 @@
        (mm-fmap #(get point->polygon-indx %))
        (mm-filter some?)))
 
-(defn as-graph "into-graph" [triangles]
-  (let [point->triangles-indx (point->triangles triangles)
-        point->points-indx (point->points point->triangles-indx)
-        point->polygon-indx (point->polygon point->triangles-indx)]
-    (polygon->polygons point->points-indx point->polygon-indx)))
+(defn voronoi-polygons->neighbours
+  "transforms bowyer-watson triangles into voronoi diagram polygons mapped into their neighbours"
+  [bowyer-watson-triangles]
+  (mm-kv-filter not=
+                (let [point->triangles-indx (point->triangles bowyer-watson-triangles)
+                      point->points-indx (point->points point->triangles-indx)
+                      point->polygon-indx (point->polygon point->triangles-indx)]
+                  (polygon->polygons point->points-indx point->polygon-indx))))
