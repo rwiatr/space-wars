@@ -27,11 +27,11 @@
 
 (defrecord Triangle [p1 p2 p3 edges c])
 (defn triangle
+  ([x1 y1 x2 y2 x3 y3] (triangle (point x1 y1) (point x2 y2) (point x3 y3)))
   ([p1 p2 p3]
    (let [points #{p1 p2 p3} ;; ensure unique
          edges  #{(edge p1 p2) (edge p2 p3) (edge p3 p1)}]
      (Triangle. (first points) (second points) (last points) edges (circumcircle p1 p2 p3))))
-
   ([p e]
    (let [points #{p (:p1 e) (:p2 e)} ;; ensure unique
          edges  #{e (edge p (:p1 e)) (edge p (:p2 e))}

@@ -11,6 +11,10 @@
   (compareTo [this other] (cmpp this other)))
 (defn point[x y] (Point2d. x y))
 
+(defn points-from
+  ([m] (point (:x m) (:y m)))
+  ([m & ms] (cons (points-from m) (map points-from ms))))
+
 (defn distance [x y]
   (let [a (- (:x x) (:x y))
         b (- (:y x) (:y y))]

@@ -18,7 +18,9 @@
     (is (= (triangle (point 0 1) (point 0 0) (point 1 0))
            (triangle (point 0 0) (edge (point 0 1) (point 1 0)))))
     (is (= (triangle (point 0 1) (point 0 0) (point 1 0))
-           (triangle (point 1 0) (edge (point 0 1) (point 0 0))))))
+           (triangle (point 1 0) (edge (point 0 1) (point 0 0)))))
+    (is (= (triangle (point 0 0) (point 0 1) (point 1 0))
+           (triangle 0 0, 0 1, 1 0))))
   (testing "illegal attributes"
     (is (thrown-with-msg? IllegalArgumentException #"Duplicate key: .*\.Point2d" (triangle (point 0 0) (point 0 0) (point 1 0))))
     (is (thrown-with-msg? IllegalArgumentException #"Duplicate key: .*\.Point2d" (triangle (point 0 0) (edge (point 0 0) (point 1 0)))))))

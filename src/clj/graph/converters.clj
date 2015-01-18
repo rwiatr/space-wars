@@ -7,25 +7,35 @@
             [geom.triangle :refer [triangle points to-circumcircle-center]]
             [geom.polygon :refer [polygon]]))
 
-(defn- neighbours? [t1 t2]
-  (empty? (clojure.set/intersection (:edges t1) (:edges t2))))
+(defn neighbours? [t1 t2]
+  (not-empty (clojure.set/intersection (:edges t1) (:edges t2))))
 
 (defn- neighbours [triangle triangles]
   (filter (partial neighbours? triangle) triangles))
 
-(defn- as-ordered-points [triangles]
-  (loop [triangles triangles
-         points ()]
-    (if (empty? triangles) points
-      (let [triangle (first triangles)]
-        (if-let [other (neighbours triangle triangles)]
-          (recur (rest triangles)
-                 (cons (to-circumcircle-center triangle) points))
-          points)))))
+(defn ordered-circumcircle-centers [triangles]
+  (loop [current (first triangles)
+         candidates (rest triangles)
+         points (list (to-circumcircle-center current))]
+    (if-let [neighbour (first (neighbours current candidates))]
+      (recur neighbour
+             (filter (partial not= neighbour) candidates)
+             (cons (to-circumcircle-center neighbour) points))
+      points)))
+
+;(defn- as-ordered-points [triangles]
+;  (loop [triangles triangles
+;         points ()]
+;    (if (empty? triangles) points
+;      (let [triangle (first triangles)]
+;        (if-let [other (neighbours triangle triangles)]
+;          (recur (rest triangles)
+;                 (cons (to-circumcircle-center triangle) points))
+;          points)))))
 
 (defn- as-node [triangles]
   (->> triangles
-       as-ordered-points
+       ordered-circumcircle-centers
        polygon
        (assoc {} :geometry)))
 

@@ -21,3 +21,9 @@
     (is (= 1.4142135623730951 (distance (point 10 16) (point 11 17))))
     (is (= 10.0 (distance (point 20 16) (point 10 16))))
     (is (= 10.0 (distance (point 10 16) (point 10 26))))))
+
+(deftest test.points-from
+  (testing "single entry"
+    (is (= (point 100 20) (points-from {:x 100 :y 20}))))
+  (testing "multiple entries"
+    (is (= (list (point 100 20) (point 1000 120)) (points-from {:x 100 :y 20} {:x 1000 :y 120})))))
