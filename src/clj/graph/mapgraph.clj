@@ -3,12 +3,6 @@
   (:use clojure.math.combinatorics)
   (:gen-class))
 
-(defn connect
-  ([graph n1 n2] (util.set_multimap/add graph n1 n2))
-  ([graph n1 n2 & nps] (apply connect (connect graph n1 n2) nps)))
-
-(defn connect-seq [graph nps] (apply connect graph nps))
-
 (defn graph[] {:connections (util.set_multimap/multimap),
                :nodes #{}
                :data {}})
@@ -42,13 +36,11 @@
   ([g [n1 n2]] (bi-connect g n1 n2))
   ([g [n1 n2] & nds] (apply array-bi-connect (array-bi-connect g [n1 n2]) nds)))
 
-(defn all-connect [g & nds]
+(defn connect-all [g & nds]
   (apply array-bi-connect g (clojure.math.combinatorics/combinations nds 2)))
 
 (defn disconnect [g n1 n2]
   (update-in g [:connections] #(del % n1 n2)))
-
-(disconnect {:connections {:a #{:b :c}}} :a :b)
 
 (defn bi-disconnect [g n1 n2]
   (-> (disconnect g n1 n2)
