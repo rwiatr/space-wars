@@ -1,7 +1,6 @@
 (ns graph.converters
   (:require [clojure.set :refer :all]
             [clojure.algo.generic.functor :refer [fmap]]
-            [graph.mapgraph :refer [property-node]]
             [util.set_multimap :refer [mm-reverse mm-index mm-merge mm-to-map mm-fmap mm-kv-fmap mm-filter del mm-kv-filter]]
             [geom.point :refer [point]]
             [geom.triangle :refer [triangle points to-circumcircle-center]]

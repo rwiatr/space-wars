@@ -2,11 +2,19 @@
   (:require [clojure.test :refer :all]
             [graph.mapgraph :refer :all]))
 
-(deftest test.mapgraph
+(deftest test.g-empty
   (testing "is empty when no elements added"
-    (is (empty? (graph))))
-  (testing "conencting two elments"
-    (is (= {'a #{'b}} (connect (graph) 'a 'b))))
-  (testing "conencting multiple elments"
-    (is (= {'a #{'b} 'b #{'c}} (connect (graph) 'a 'b 'b 'c)))
-    (is (= {'a #{'b} 'b #{'c}} (connect-seq (graph) ['a 'b 'b 'c])))))
+    (is (g-empty? (graph))))
+  (testing "after adding to graph its not empty"
+    (is (not (-> (graph) (g-add :a) g-empty?)))))
+
+(deftest test.g-contains?
+  (testing "empty graph does not contain node"
+    (is (not (g-contains? (graph) :a)))
+    (is (not (g-contains? (graph) :a :b :c))))
+  (testing "after adding to graph it contains only added items"
+    (is (-> (graph) (g-add :a) (g-contains? :a)))
+    (is (-> (graph) (g-add :a :b) (g-contains? :a :b)))
+    (is (not (-> (graph) (g-add :a :b) (g-contains? :a :b :c))))
+    (is (not (-> (graph) (g-add :a :b) (g-contains? :c))))))
+

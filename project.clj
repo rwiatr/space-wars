@@ -5,7 +5,8 @@
   :dependencies [[pjstadig/humane-test-output "0.6.0"]
                  [quil "2.2.4"]
                  [org.clojure/clojure "1.6.0"]
-                 [org.clojure/algo.generic "0.1.2"]]
+                 [org.clojure/algo.generic "0.1.2"]
+                 [org.clojure/math.combinatorics "0.0.8"]]
   :injections [(require 'pjstadig.humane-test-output)
                (pjstadig.humane-test-output/activate!)]
   :plugins [[lein-cloverage "1.0.2"]]

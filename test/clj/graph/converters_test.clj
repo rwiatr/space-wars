@@ -5,7 +5,6 @@
             [geom.point :refer [point points-from]]
             [geom.triangle :refer [triangle points to-circumcircle-center to-circumcircles-centers]]
             [geom.polygon :refer [polygon]]
-            [graph.mapgraph :refer [property-node]]
             [graph.bowyer-watson :refer [bowyer-watson_2d bw-standard-filter]]))
 
 (deftest test.indexing-finctions

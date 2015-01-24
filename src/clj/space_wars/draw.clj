@@ -18,11 +18,11 @@
 (defn trn [a b c d e f]
   (triangle (point a b) (point c d) (point e f)))
 
-(def pts (take 10 (random-points))); (point 0 0) (point 800 0) (point 0 600) (point 800 600)))
-(def bwt (bw-standard-filter 10000000
+(def pts (take 500 (random-points))); (point 0 0) (point 800 0) (point 0 600) (point 800 600)))
+(def bwt (bw-standard-filter 100000
                              (bowyer-watson_2d pts :boundries (triangle (point -100000 -100000) (point 100000 -100000) (point 0 100000)))))
 ;(def bwt [(trn 100 100, 100 200, 200 100) (trn 100 200, 200 100, 300 200) (trn 300 200, 300 100, 200 100) (trn 300 200, 100 200, 200 300)])
-(def bwt [(trn 80 90, 0 100, 0 0)
+(comment def bwt [(trn 80 90, 0 100, 0 0)
           (trn 80 90, 0 0, 100 0)
           (trn 80 90, 200 0, 100 0)
           (trn 80 90, 200 0, 200 100)
