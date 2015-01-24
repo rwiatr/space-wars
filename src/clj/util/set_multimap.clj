@@ -55,7 +55,6 @@
 (defn mm-kv-filter [f mm]
   (mm-kv-fmap f mm filter))
 
-
 (defn- mm-seq-impl [kvs k vs]
   (cond
    (not-empty vs) (cons [k (first vs)] (lazy-seq (mm-seq-impl kvs k (rest vs))))
@@ -70,3 +69,21 @@
 
 (defn mm-to-map [f mm]
   (fmap f mm))
+
+(defn mm-contains-key
+  ([mm k] (contains? mm k))
+  ([mm k & ks] (every? true?
+                       (cons (mm-contains-key mm k)
+                             (map #(mm-contains-key mm %) ks)))))
+
+(defn mm-contains-val
+  ([mm v] (not-every? false? (map #(contains? % v) (vals mm))))
+  ([mm v & vs] (every? true?
+                       (cons (mm-contains-val mm v)
+                             (map #(mm-contains-val mm %) vs)))))
+
+(defn mm-contains-kv
+  ([mm k v] (contains? (get mm k) v))
+  ([mm k v & kvs] (every? true?
+                          (cons (mm-contains-kv mm k v)
+                                (map (fn [[k v]] (mm-contains-kv mm k v)) (partition-all 2 kvs))))))

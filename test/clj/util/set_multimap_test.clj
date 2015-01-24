@@ -62,5 +62,22 @@
   (testing "mm-seq"
     (is (= (list [:k2 :v2] [:k1 :v1]) (mm-seq (add (multimap) :k1 :v1 :k2 :v2))))
     (is (= (list [:k1 :v2] [:k1 :v1]) (mm-seq (add (multimap) :k1 :v1 :k1 :v2))))
-    (is (= (list) (mm-seq (multimap))))))
+    (is (= (list) (mm-seq (multimap)))))
+  (testing "contains key"
+    (is (mm-contains-key (add (multimap) :k1 :v1 :k2 :v2) :k1))
+    (is (mm-contains-key (add (multimap) :k1 :v1 :k2 :v2) :k1 :k2))
+    (is (not (mm-contains-key (add (multimap) :k1 :v1 :k2 :v2) :k3)))
+    (is (not (mm-contains-key (add (multimap) :k1 :v1 :k2 :v2) :k1 :k2 :k3))))
+  (testing "contains val"
+    (is (mm-contains-val (add (multimap) :k1 :v1 :k2 :v2) :v1))
+    (is (mm-contains-val (add (multimap) :k1 :v1 :k2 :v2) :v1 :v2))
+    (is (not (mm-contains-val (add (multimap) :k1 :v1 :k2 :v2) :v3)))
+    (is (not (mm-contains-val (add (multimap) :k1 :v1 :k2 :v2) :v1 :v2 :v3))))
+  (testing "contains key-val"
+    (is (mm-contains-kv (add (multimap) :k1 :v1 :k2 :v2 :k1 :v2) :k1 :v1))
+    (is (mm-contains-kv (add (multimap) :k1 :v1 :k2 :v2 :k1 :v2) :k1 :v1 :k2 :v2))
+    (is (not (mm-contains-kv (add (multimap) :k1 :v1 :k2 :v2 :k1 :v2) :k1 :v3)))
+    (is (not (mm-contains-kv (add (multimap) :k1 :v1 :k2 :v2 :k1 :v2) :k3 :v1)))
+    (is (not (mm-contains-kv (add (multimap) :k1 :v1 :k2 :v2 :k1 :v2) :k1 :v1 :k2 :v2 :k1 :v3)))
+    (is (not (mm-contains-kv (add (multimap) :k1 :v1 :k2 :v2 :k1 :v2) :k1 :v1 :k2 :v2 :k3 :v1)))))
 
