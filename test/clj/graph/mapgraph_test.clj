@@ -64,3 +64,37 @@
     (is (-> (graph) (g-connect-all :a :b :c) (g-bi-connected? :a :b)))
     (is (-> (graph) (g-connect-all :a :b :c) (g-bi-connected? :a :c)))
     (is (-> (graph) (g-connect-all :a :b :c) (g-bi-connected? :b :c)))))
+
+(deftest test.g-disconnect
+  (testing "disconnect does not remove nodes from graph"
+    (is (-> (graph) (g-connect :a :b) (g-disconnect :a :b) (g-contains? :a)))
+    (is (-> (graph) (g-connect :a :b) (g-disconnect :a :b) (g-contains? :b)))
+    (is (not (-> (graph) (g-connect :a :b) (g-disconnect :c :b) (g-contains? :c)))))
+  (testing "disconnect removes one way connection"
+    (is (not (-> (graph) (g-connect :a :b) (g-disconnect :a :b) (g-connected? :a :b))))
+    (is (-> (graph) (g-bi-connect :a :b) (g-disconnect :a :b) (g-connected? :b :a)))
+    (is (-> (graph) (g-bi-connect :a :b) (g-disconnect :a :c) (g-bi-connected? :a :b)))))
+
+(deftest test.g-bi-disconnect
+  (testing "bi-disconnect does not remove nodes from graph"
+    (is (-> (graph) (g-connect :a :b) (g-bi-disconnect :a :b) (g-contains? :a)))
+    (is (-> (graph) (g-connect :a :b) (g-bi-disconnect :a :b) (g-contains? :b))))
+  (testing "disconnect removes two way connection"
+    (is (not (-> (graph) (g-bi-connect :a :b) (g-bi-disconnect :a :b) (g-connected? :a :b))))
+    (is (not (-> (graph) (g-bi-connect :a :b) (g-bi-disconnect :a :b) (g-connected? :b :a))))
+    (is (-> (graph) (g-bi-connect :a :b) (g-bi-disconnect :c :b) (g-bi-connected? :a :b)))))
+
+(deftest test.g-disconnect-all
+  (testing "disconnect does not remove nodes from graph"
+    (is (-> (graph) (g-connect-all :a :b) (g-disconnect-all :a :b) (g-contains? :a :b)))
+    (is (-> (graph) (g-connect-all :a :b :c :d) (g-disconnect-all :a :b :c :d) (g-contains? :a :b :c :d)))
+    (is (-> (graph) (g-connect-all :a :b) (g-disconnect-all :a :f) (g-contains? :a :b))))
+  (testing "disconnect removes all two way connection"
+    (is (not (-> (graph) (g-connect-all :a :b :c :d) (g-disconnect-all :a :b :c :f) (g-connected? :a :b))))
+    (is (not (-> (graph) (g-connect-all :a :b :c :d) (g-disconnect-all :a :b :c :f) (g-connected? :a :c))))
+    (is (not (-> (graph) (g-connect-all :a :b :c :d) (g-disconnect-all :a :b :c :f) (g-connected? :c :b))))
+    (is (-> (graph) (g-connect-all :a :b :c :d) (g-disconnect-all :a :b :c :f) (g-connected? :d :a)))
+    (is (-> (graph) (g-connect-all :a :b :c :d) (g-disconnect-all :a :b :c :f) (g-connected? :d :b)))
+    (is (-> (graph) (g-connect-all :a :b :c :d) (g-disconnect-all :a :b :c :f) (g-connected? :d :c)))
+    (is (not (-> (graph) (g-connect-all :a :b :c :d) (g-disconnect-all :a :b :c :f) (g-connected? :a :f))))
+    (is (not (-> (graph) (g-connect-all :a :b :c :d) (g-disconnect-all :a :b :c :f) (g-connected? :d :f))))))

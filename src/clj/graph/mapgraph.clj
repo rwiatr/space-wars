@@ -33,9 +33,9 @@
       (update-in [:connections] #(add % n1 n2))))
 
 (defn g-connect-to-many [g n & nds]
-   (-> (apply g-add g nds)
-       (g-add n)
-       (update-in [:connections] #(addseq % n nds))))
+  (-> (apply g-add g nds)
+      (g-add n)
+      (update-in [:connections] #(addseq % n nds))))
 
 (defn g-bi-connect
   ([g n1 n2] (-> g (g-connect n1 n2) (g-connect n2 n1)))
@@ -53,10 +53,14 @@
 
 (defn g-bi-disconnect [g n1 n2]
   (-> (g-disconnect g n1 n2)
-      (g-disconnect n2 n1)))
+                 (g-disconnect n2 n1)))
+
+(defn- array-bi-disconnect
+  ([g [n1 n2]] (g-bi-disconnect g n1 n2))
+  ([g [n1 n2] & nds] (apply array-bi-disconnect (array-bi-disconnect g [n1 n2]) nds)))
 
 (defn g-disconnect-all [g & nds]
-  (apply g-bi-disconnect g (clojure.math.combinatorics/combinations nds 2)))
+  (apply array-bi-disconnect g (clojure.math.combinatorics/combinations nds 2)))
 
 (defn g-prop-del [g pk n]
   (if (g-contains? g n)
