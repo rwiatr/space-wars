@@ -91,7 +91,8 @@
   (q/stroke 120)
   (doseq [g geoms] (drawpoly (:geometry g)))
   (q/stroke 255 0 0)
-  (doseq [t bwt] (drawpoints (points t))))
+  ;(doseq [t bwt] (drawpoints (points t)))
+  )
 
 (q/defsketch example                  ;; Define a new sketch named example
   :title "Oh so many grey circles"    ;; Set the title of the sketch

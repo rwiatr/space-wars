@@ -24,6 +24,21 @@
 (defn g-bi-connected? [g n1 n2]
   (and (g-connected? g n1 n2) (g-connected? g n2 n1)))
 
+(defn g-add-prop [g pk n v]
+  (if (g-contains? g n)
+    (assoc-in g [:data n pk] v)
+    g))
+
+(defn g-get-prop [g pk n]
+  (get-in g [:data n pk]))
+
+(defn g-del-prop [g pk n]
+  (if (g-contains? g n)
+    (let [ng (update-in g [:data n] dissoc pk)]
+      (if (empty? (get-in ng [:data n])) ; removes {property {}} entries
+        (update-in ng [:data] dissoc n)
+        ng))))
+
 (defn g-add
   ([g n] (update-in g [:nodes] #(conj % n)))
   ([g n & nds] (apply g-add (g-add g n) nds)))
@@ -61,19 +76,3 @@
 
 (defn g-disconnect-all [g & nds]
   (apply array-bi-disconnect g (clojure.math.combinatorics/combinations nds 2)))
-
-(defn g-prop-add [g pk n v]
-  (if (g-contains? g n)
-    (assoc-in g [:data pk n] v)
-    g))
-
-(defn g-get-prop [g pk n]
-  (get-in g [:data pk n]))
-
-(defn g-prop-del [g pk n]
-  (if (g-contains? g n)
-    (let [ng (update-in g [:data pk] dissoc n)]
-      (println (empty? (get-in ng [:data pk])))
-      (if (empty? (get-in ng [:data pk])) ; removes {property {}} entries
-        (update-in ng [:data] dissoc pk)
-        ng))))

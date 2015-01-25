@@ -112,3 +112,16 @@
     (is (-> (graph) (g-connect :b :a) (g-connected-any? :a :b)))
     (is (-> (graph) (g-bi-connect :a :b) (g-connected-any? :a :b)))
     (is (-> (graph) (g-bi-connect :a :b) (g-connected-any? :b :a)))))
+
+(deftest test.props
+  (testing "get property when it is not set or deleted"
+    (is (nil? (-> (graph) (g-get-prop :pk :a))))
+    (is (nil? (-> (graph) (g-add :a) (g-get-prop :pk :a))))
+    (is (nil? (-> (graph) (g-add :a) (g-add-prop :pk :a :v) (g-del-prop :pk :a) (g-get-prop :pk :a))))
+    (is (nil? (-> (graph) (g-add :b) (g-add-prop :pk :b :v) (g-get-prop :pk :a)))))
+  (testing "add and get property"
+    (is (= :v1 (-> (graph) (g-add :a) (g-add-prop :pk :a :v1) (g-get-prop :pk :a))))
+    (is (= :v2 (-> (graph) (g-add :a) (g-add-prop :pk :a :v1) (g-add-prop :pk :a :v2) (g-get-prop :pk :a)))))
+  (testing "property is deleted with node"
+    ;(is (nil? (-> (graph) (g-add :a) (g-add-prop :pk :a :v1) (g-del :a) (g-get-prop :pk :a))))
+    ))
