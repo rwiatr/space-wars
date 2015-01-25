@@ -68,7 +68,7 @@
 
 (defn g-bi-disconnect [g n1 n2]
   (-> (g-disconnect g n1 n2)
-                 (g-disconnect n2 n1)))
+      (g-disconnect n2 n1)))
 
 (defn- array-bi-disconnect
   ([g [n1 n2]] (g-bi-disconnect g n1 n2))
