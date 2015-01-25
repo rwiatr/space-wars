@@ -15,41 +15,50 @@
   ([g n & nds] (and (g-contains? g n)
                     (every? true? (map (partial g-contains? g) nds)))))
 
+(defn g-connected? [g n1 n2]
+  (-> g :connections (mm-contains-kv n1 n2)))
+
+(defn g-connected-any? [g n1 n2]
+  (or (g-connected? g n1 n2) (g-connected? g n2 n1)))
+
+(defn g-bi-connected? [g n1 n2]
+  (and (g-connected? g n1 n2) (g-connected? g n2 n1)))
+
 (defn g-add
   ([g n] (update-in g [:nodes] #(conj % n)))
   ([g n & nds] (apply g-add (g-add g n) nds)))
 
-(defn connect [g n1 n2]
+(defn g-connect [g n1 n2]
   (-> (g-add g n1 n2)
       (update-in [:connections] #(add % n1 n2))))
 
-(defn connect-to-many [g n & nds]
+(defn g-connect-to-many [g n & nds]
    (-> (apply g-add g nds)
        (g-add n)
        (update-in [:connections] #(addseq % n nds))))
 
-(defn bi-connect
-  ([g n1 n2] (-> g (connect n1 n2) (connect n2 n1)))
-  ([g n1 n2 & nds] (apply  bi-connect (bi-connect g n1 n2) nds)))
+(defn g-bi-connect
+  ([g n1 n2] (-> g (g-connect n1 n2) (g-connect n2 n1)))
+  ([g n1 n2 & nds] (apply g-bi-connect (g-bi-connect g n1 n2) nds)))
 
 (defn- array-bi-connect
-  ([g [n1 n2]] (bi-connect g n1 n2))
+  ([g [n1 n2]] (g-bi-connect g n1 n2))
   ([g [n1 n2] & nds] (apply array-bi-connect (array-bi-connect g [n1 n2]) nds)))
 
-(defn connect-all [g & nds]
+(defn g-connect-all [g & nds]
   (apply array-bi-connect g (clojure.math.combinatorics/combinations nds 2)))
 
-(defn disconnect [g n1 n2]
+(defn g-disconnect [g n1 n2]
   (update-in g [:connections] #(del % n1 n2)))
 
-(defn bi-disconnect [g n1 n2]
-  (-> (disconnect g n1 n2)
-      (disconnect n2 n1)))
+(defn g-bi-disconnect [g n1 n2]
+  (-> (g-disconnect g n1 n2)
+      (g-disconnect n2 n1)))
 
-(defn disconnect-all [g & nds]
-  (apply bi-disconnect g (clojure.math.combinatorics/combinations nds 2)))
+(defn g-disconnect-all [g & nds]
+  (apply g-bi-disconnect g (clojure.math.combinatorics/combinations nds 2)))
 
-(defn prop-del [g pk n]
+(defn g-prop-del [g pk n]
   (if (g-contains? g n)
     (let [ng (update-in g [:data pk] dissoc n)]
       (println (empty? (get-in ng [:data pk])))
@@ -57,7 +66,7 @@
         (update-in ng [:data] dissoc pk)
         ng))))
 
-(defn prop-add [g pk n v]
+(defn g-prop-add [g pk n v]
   (if (g-contains? g n)
     (assoc-in g [:data pk n] v)
     g))
