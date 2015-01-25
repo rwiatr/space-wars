@@ -22,6 +22,10 @@
   (testing "connection adds nodes to graph"
     (is (-> (graph) (g-connect :a :b) (g-contains? :a :b)))
     (is (-> (graph) (g-connect :a :b) (g-connect :a :c) (g-contains? :a :b :c))))
+  (testing "self connection is two way"
+    (is (-> (graph) (g-connect :a :a) (g-contains? :a)))
+    (is (-> (graph) (g-connect :a :a) (g-connected? :a :a)))
+    (is (-> (graph) (g-connect :a :a) (g-bi-connected? :a :a))))
   (testing "connection adds one way connection to graph"
     (is (-> (graph) (g-connect :a :b) (g-connected? :a :b)))
     (is (not (-> (graph) (g-connect :a :b) (g-bi-connected? :a :b))))
@@ -98,3 +102,13 @@
     (is (-> (graph) (g-connect-all :a :b :c :d) (g-disconnect-all :a :b :c :f) (g-connected? :d :c)))
     (is (not (-> (graph) (g-connect-all :a :b :c :d) (g-disconnect-all :a :b :c :f) (g-connected? :a :f))))
     (is (not (-> (graph) (g-connect-all :a :b :c :d) (g-disconnect-all :a :b :c :f) (g-connected? :d :f))))))
+
+(deftest test.g-connected-any?
+  (testing "not existing is disconected"
+    (is (not (-> (graph) (g-connected-any? :a :b))))
+    (is (not (-> (graph) (g-connect :a :c) (g-connected-any? :a :b)))))
+  (testing "two way and one way connections are valid"
+    (is (-> (graph) (g-connect :a :b) (g-connected-any? :a :b)))
+    (is (-> (graph) (g-connect :b :a) (g-connected-any? :a :b)))
+    (is (-> (graph) (g-bi-connect :a :b) (g-connected-any? :a :b)))
+    (is (-> (graph) (g-bi-connect :a :b) (g-connected-any? :b :a)))))

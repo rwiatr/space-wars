@@ -62,6 +62,14 @@
 (defn g-disconnect-all [g & nds]
   (apply array-bi-disconnect g (clojure.math.combinatorics/combinations nds 2)))
 
+(defn g-prop-add [g pk n v]
+  (if (g-contains? g n)
+    (assoc-in g [:data pk n] v)
+    g))
+
+(defn g-get-prop [g pk n]
+  (get-in g [:data pk n]))
+
 (defn g-prop-del [g pk n]
   (if (g-contains? g n)
     (let [ng (update-in g [:data pk] dissoc n)]
@@ -69,8 +77,3 @@
       (if (empty? (get-in ng [:data pk])) ; removes {property {}} entries
         (update-in ng [:data] dissoc pk)
         ng))))
-
-(defn g-prop-add [g pk n v]
-  (if (g-contains? g n)
-    (assoc-in g [:data pk n] v)
-    g))
