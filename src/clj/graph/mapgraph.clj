@@ -24,12 +24,12 @@
 (defn g-bi-connected? [g n1 n2]
   (and (g-connected? g n1 n2) (g-connected? g n2 n1)))
 
-(defn g-add-prop [g pk n v]
+(defn g-add-prop [g n pk v]
   (if (g-contains? g n)
     (assoc-in g [:data n pk] v)
     g))
 
-(defn g-get-prop [g pk n]
+(defn g-get-prop [g n pk]
   (get-in g [:data n pk]))
 
 (defn g-del-prop [g pk n]
@@ -43,11 +43,10 @@
   ([g n] (update-in g [:nodes] #(conj % n)))
   ([g n & nds] (apply g-add (g-add g n) nds)))
 
-(defn g-rem
-  ([g n] (-> (update-in g [:nodes] #(remove % n))
-             (update-in [:data] #(remove % n))
-             (update-in [:connections] #(-> (del % n)
-                                            (mm-rem-val n))))))
+(defn g-rem [g n] (-> (update-in g [:nodes] #(disj % n))
+                      (update-in [:data] #(dissoc % n))
+                      (update-in [:connections] #(-> (del % n)
+                                                     (mm-rem-val n)))))
 
 (defn g-connect [g n1 n2]
   (-> (g-add g n1 n2)

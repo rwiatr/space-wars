@@ -34,7 +34,7 @@
 (deftest test.g-connect-to-many
   (testing "connect-to-many adds nodes to graph"
     (is (-> (graph) (g-connect-to-many :a :b :c :d) (g-contains? :a :b :c :d))))
-    (is (-> (graph) (g-connect-to-many :a :b :c) (g-connect-to-many :a :d :e) (g-contains? :a :b :c :d :e)))
+  (is (-> (graph) (g-connect-to-many :a :b :c) (g-connect-to-many :a :d :e) (g-contains? :a :b :c :d :e)))
   (testing "connect-to-many adds one way connection to graph"
     (is (-> (graph) (g-connect-to-many :a :b :c) (g-connected? :a :b)))
     (is (-> (graph) (g-connect-to-many :a :b :c) (g-connected? :a :c)))
@@ -115,13 +115,27 @@
 
 (deftest test.props
   (testing "get property when it is not set or deleted"
-    (is (nil? (-> (graph) (g-get-prop :pk :a))))
-    (is (nil? (-> (graph) (g-add :a) (g-get-prop :pk :a))))
-    (is (nil? (-> (graph) (g-add :a) (g-add-prop :pk :a :v) (g-del-prop :pk :a) (g-get-prop :pk :a))))
-    (is (nil? (-> (graph) (g-add :b) (g-add-prop :pk :b :v) (g-get-prop :pk :a)))))
+    (is (nil? (-> (graph) (g-get-prop :a :pk))))
+    (is (nil? (-> (graph) (g-add :a) (g-get-prop :a :pk))))
+    (is (nil? (-> (graph) (g-add :a) (g-add-prop :a :pk :v) (g-del-prop :a :pk) (g-get-prop :a :pk))))
+    (is (nil? (-> (graph) (g-add :b) (g-add-prop :b :pk :v) (g-get-prop :a :pk)))))
   (testing "add and get property"
-    (is (= :v1 (-> (graph) (g-add :a) (g-add-prop :pk :a :v1) (g-get-prop :pk :a))))
-    (is (= :v2 (-> (graph) (g-add :a) (g-add-prop :pk :a :v1) (g-add-prop :pk :a :v2) (g-get-prop :pk :a)))))
+    (is (= :v1 (-> (graph) (g-add :a) (g-add-prop :a :pk :v1) (g-get-prop :a :pk))))
+    (is (= :v2 (-> (graph) (g-add :a) (g-add-prop :a :pk :v1) (g-add-prop :a :pk :v2) (g-get-prop :a :pk)))))
   (testing "property is deleted with node"
-    ;(is (nil? (-> (graph) (g-add :a) (g-add-prop :pk :a :v1) (g-del :a) (g-get-prop :pk :a))))
-    ))
+    (is (nil? (-> (graph) (g-add :a) (g-add-prop :a :pk :v1) (g-rem :a) (g-get-prop :a :pk))))))
+
+(deftest test.rem
+  (testing "node is deleted from :nodes"
+    (is (not (-> (graph) (g-add :a :b) (g-rem :a) (g-contains? :a))))
+    (is (-> (graph) (g-add :a :b) (g-rem :a) (g-contains? :b)))
+    (is (-> (graph) (g-add :a) (g-rem :c) (g-contains? :a))))
+  (testing "node is deleted from properties"
+    (is (nil? (-> (graph) (g-add :a :b) (g-add-prop :a :key :val) (g-rem :a) (g-get-prop :a :key)))))
+  (testing "node is deleted from :connections"
+    (is (not (-> (graph) (g-connect :a :b) (g-rem :a) (g-connected? :a :b))))
+    (is (not (-> (graph) (g-connect :a :b) (g-rem :a) (g-connected? :b :a))))
+    (is (not (-> (graph) (g-bi-connect :a :b) (g-rem :a) (g-connected? :a :b))))
+    (is (not (-> (graph) (g-bi-connect :a :b) (g-rem :a) (g-connected? :b :a))))
+    (is (-> (graph) (g-bi-connect :a :b) (g-bi-connect :a :c) (g-rem :b) (g-connected? :a :c)))
+    (is (-> (graph) (g-bi-connect :a :b) (g-bi-connect :a :c) (g-rem :b) (g-connected? :c :a)))))
