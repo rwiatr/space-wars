@@ -55,6 +55,16 @@
 (defn mm-kv-filter [f mm]
   (mm-kv-fmap f mm filter))
 
+(defn- not-in "((not-in :a :b) :d)->true ((not-in :a :b) :a)->false"
+  ([v] (fn [x] (not= v x)))
+  ([v & vs] (fn [x]
+              (every? true?
+                      (map (not-in x) (cons v vs))))))
+
+(defn mm-rem-val
+  ([mm v] (mm-filter (not-in v) mm))
+  ([mm v & vs] (mm-filter (apply not-in v vs) mm)))
+
 (defn- mm-seq-impl [kvs k vs]
   (cond
    (not-empty vs) (cons [k (first vs)] (lazy-seq (mm-seq-impl kvs k (rest vs))))

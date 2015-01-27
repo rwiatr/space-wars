@@ -43,6 +43,12 @@
   ([g n] (update-in g [:nodes] #(conj % n)))
   ([g n & nds] (apply g-add (g-add g n) nds)))
 
+(defn g-rem
+  ([g n] (-> (update-in g [:nodes] #(remove % n))
+             (update-in [:data] #(remove % n))
+             (update-in [:connections] #(-> (del % n)
+                                            (mm-rem-val n))))))
+
 (defn g-connect [g n1 n2]
   (-> (g-add g n1 n2)
       (update-in [:connections] #(add % n1 n2))))

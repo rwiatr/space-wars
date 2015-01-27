@@ -79,5 +79,10 @@
     (is (not (mm-contains-kv (add (multimap) :k1 :v1 :k2 :v2 :k1 :v2) :k1 :v3)))
     (is (not (mm-contains-kv (add (multimap) :k1 :v1 :k2 :v2 :k1 :v2) :k3 :v1)))
     (is (not (mm-contains-kv (add (multimap) :k1 :v1 :k2 :v2 :k1 :v2) :k1 :v1 :k2 :v2 :k1 :v3)))
-    (is (not (mm-contains-kv (add (multimap) :k1 :v1 :k2 :v2 :k1 :v2) :k1 :v1 :k2 :v2 :k3 :v1)))))
+    (is (not (mm-contains-kv (add (multimap) :k1 :v1 :k2 :v2 :k1 :v2) :k1 :v1 :k2 :v2 :k3 :v1))))
+  (testing "remove value from multimap"
+    (is (= {:k1 #{:v2} :k2 #{:v2}} (mm-rem-val (add (multimap) :k1 :v1 :k1 :v2 :k2 :v2) :v1)))
+    (is (= {:k1 #{:v1}} (mm-rem-val (add (multimap) :k1 :v1 :k1 :v2 :k2 :v2) :v2 :v3)))
+    (is (= {} (mm-rem-val (add (multimap) :k1 :v1 :k1 :v2 :k2 :v2) :v1 :v2 :v3)))
+    (is (= {:k1 #{:v1 :v2} :k2 #{:v2}} (mm-rem-val (add (multimap) :k1 :v1 :k1 :v2 :k2 :v2) :v3)))))
 
