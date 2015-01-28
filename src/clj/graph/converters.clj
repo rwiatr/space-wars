@@ -22,16 +22,6 @@
              (cons (to-circumcircle-center neighbour) points))
       points)))
 
-;(defn- as-ordered-points [triangles]
-;  (loop [triangles triangles
-;         points ()]
-;    (if (empty? triangles) points
-;      (let [triangle (first triangles)]
-;        (if-let [other (neighbours triangle triangles)]
-;          (recur (rest triangles)
-;                 (cons (to-circumcircle-center triangle) points))
-;          points)))))
-
 (defn- as-node [triangles]
   (->> triangles
        ordered-circumcircle-centers
@@ -65,3 +55,11 @@
                       point->points-indx (point->points point->triangles-indx)
                       point->polygon-indx (point->polygon point->triangles-indx)]
                   (polygon->polygons point->points-indx point->polygon-indx))))
+
+(defn into-g
+  ([connect-fn g [n n-seq]] (apply connect-fn g n n-seq))
+  ([connect-fn g [n n-seq] & other]
+   (apply into-g connect-fn (into-g connect-fn g [n n-seq]) other)))
+
+(defn into-graph [connect-fn g mm-seq]
+  (apply into-g connect-fn g (first mm-seq) (rest mm-seq)))
