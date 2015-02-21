@@ -42,9 +42,9 @@
   (testing "does not filter out non border"
     (is (not-empty (bw-standard-filter [(triangle (point 1 0) (point 0 1) (point 0 0))])))))
 
-(deftest test.as-graph
+(deftest test.as-graph2
   (testing "standard graph"
     (is (= {(point 0 0) #{(point 0 1) (point 2 1)}
             (point 0 1) #{(point 0 0) (point 2 1)}
-            (point 2 1) #{(point 0 1) (point 0 0)}} (as-graph (bowyer-watson_2d [(point 0 0) (point 0 1) (point 2 1)]))))))
+            (point 2 1) #{(point 0 1) (point 0 0)}} (as-graph2 (bowyer-watson_2d [(point 0 0) (point 0 1) (point 2 1)]))))))
 

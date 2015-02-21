@@ -17,6 +17,11 @@
      (point (/ (- (* c2 b1) (* c1 b2)) (- (* a1 b2) (* a2 b1)))
             (/ (- (* a2 c1) (* a1 c2)) (- (* a1 b2) (* a2 b1)))))))
 
+(defn circumcircle-defined?
+  ([t] (circumcircle-defined? (:p1 t) (:p2 t) (:p3 t)))
+  ([p1 p2 p3] (try (circumcircle-p p1 p2 p3)
+                (catch Exception e)))) ;divide by zero
+
 (defn circumcircle
   ([t] (circumcircle (:p1 t) (:p2 t) (:p3 t)))
   ([p1 p2 p3]

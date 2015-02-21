@@ -1,6 +1,6 @@
 (ns graph.bowyer-watson
   (:require [clojure.set :refer :all]
-            [geom.triangle :refer [triangle points]]
+            [geom.triangle :refer [triangle points circumcircle-defined?]]
             [geom.edge :refer [edge]]
             [geom.point :refer [point distance]]
             [util.monit :refer :all])
@@ -36,15 +36,15 @@
        (map key)))
 
 (defn- recreate [point edges]
-  (map #(triangle point %) edges))
+  (for [e edges :when (circumcircle-defined? point (:p1 e) (:p2 e))] (triangle point e)))
 
 (defn- triangles-with-intersecting-circumcircle [point triangles]
   (filter #(not (> (distance (:p (:c %)) point) (:r (:c %)))) triangles))
 
 (defn bowyer-watson_2d [points & {:keys [boundries timer-monitor]
-                                  :or {boundries (triangle (point -100 -100) (point 100 -100) (point 0 100))
+                                  :or {boundries #{(triangle (point -100 -100) (point 100 -100) (point 0 100))}
                                        timer-monitor nil-monit}}]
-  (loop [triangles #{boundries}
+  (loop [triangles boundries
          points points]
     (if (empty? points) triangles ;; end of points - stop condition
       (let [point (first points)
@@ -94,7 +94,7 @@
         (recur (rest triangles) newGraph))
       graph)))
 
-(defn as-graph [triangles & {:keys [connect
+(defn as-graph2 [triangles & {:keys [connect
                                     graph
                                     edge-filter]
                              :or {connect (fn [graph p1 p2]

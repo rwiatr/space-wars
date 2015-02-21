@@ -5,9 +5,20 @@
 
 (defn multimap [] {})
 
+(defmacro apply-rec [f x args]
+   `(loop [x# ~x, args# ~args]
+      (if (empty? args#) x#
+        (recur (~f x# (first args#) (rest args#))))))
+
+(defmacro apply-rec2 [f x args]
+   `(loop [x# ~x, args# ~args]
+      (if (empty? args#) x#
+        (recur (~f x# (first args#) (second args#)) (rest (rest args#))))))
+
 (defn add
   ([mm k v] (assoc mm k (conj (get mm k #{}) v)))
-  ([mm k v & kvs] (apply add (add mm k v) kvs)))
+  ([mm k v & kvs]
+   (apply-rec2 add (add mm k v) kvs)))
 
 (defn addseq
   ([mm k vseq]
@@ -21,7 +32,7 @@
               (if (empty? (get nm k))
                 (del nm k)
                 nm)))
-  ([mm k v & kvs] (apply del (del mm k v) kvs)))
+  ([mm k v & kvs] (apply-rec2 del (del mm k v) kvs)))
 
 (defn mm-merge [& mms]
   (apply (partial merge-with union) mms))
