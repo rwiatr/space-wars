@@ -69,7 +69,7 @@
      (doseq [p pts] (do (let [n (point->node-m p)
                               nds (map point->node-m (point->point-mm p))
                               gm (:geometry (point->polygon-m p))]
-                          (swap! g g-connect-to-many n nds)
+                          (swap! g #(apply g-connect-to-many % n nds))
                           (swap! g g-add-prop n :geometry gm))))
      @g)))
 

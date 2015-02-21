@@ -11,8 +11,9 @@
 
 (defn addseq
   ([mm k vseq]
-   (let [s (get mm k #{})]
-     (assoc mm k (apply conj s vseq)))))
+   (if (empty? vseq) mm
+     (let [s (get mm k #{})]
+       (assoc mm k (apply conj s vseq))))))
 
 (defn del
   ([mm k] (dissoc mm k))

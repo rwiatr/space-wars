@@ -32,6 +32,8 @@
     (is (not (-> (graph) (g-connect :a :b) (g-connected? :b :a))))))
 
 (deftest test.g-connect-to-many
+  (testing "no nodes to connect"
+    (is (-> (graph) (g-connect-to-many :a) (g-contains? :a))))
   (testing "connect-to-many adds nodes to graph"
     (is (-> (graph) (g-connect-to-many :a :b :c :d) (g-contains? :a :b :c :d))))
   (is (-> (graph) (g-connect-to-many :a :b :c) (g-connect-to-many :a :d :e) (g-contains? :a :b :c :d :e)))

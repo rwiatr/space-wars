@@ -30,6 +30,7 @@
     (is (= {} (del (add (multimap) :k1 :v1 :k1 :v2) :k1 :v1 :k1 :v2)))
     (is (= {} (del (add (multimap) :k1 :v1) :k1 :v1))))
   (testing "test add sequence"
+    (is (= {} (addseq (multimap) :k1 [])))
     (is (= {:k1 #{:v1 :v2}} (addseq (multimap) :k1 [:v1 :v1 :v2])))
     (is (= {:k1 #{:v1 :v2 :v3}} (addseq (multimap) :k1 [:v1 :v2 :v3]))))
   (testing "reverse multimap"

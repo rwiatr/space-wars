@@ -40,6 +40,7 @@
         ng))))
 
 (defn g-add
+  ([g] g)
   ([g n] (update-in g [:nodes] #(conj % n)))
   ([g n & nds] (apply g-add (g-add g n) nds)))
 

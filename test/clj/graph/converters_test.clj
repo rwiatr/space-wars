@@ -101,3 +101,24 @@
            (ordered-circumcircle-centers [(triangle 100 100, 100 1000, 0 0)
                                           (triangle 100 100, 100 1000, 200 0)
                                           (triangle 100 100, 200 0, 0 0)])))))
+
+(deftest test.as-graph
+  (testing "empty input"
+    (is (= {:connections {}, :nodes #{}, :data {}} (as-graph {} {}))))
+  (testing "building a graph from valid data"
+    (is (= {:connections {},
+            :nodes #{:node-1},
+            :data {:node-1 {:geometry :g_A}}}
+           (as-graph {:A #{}} {:A {:geometry :g_A}}))
+        (= {:connections {},
+            :nodes #{:node-2 :node-1},
+            :data {:node-2 {:geometry :g_B}, :node-1 {:geometry :g_A}}}
+           (as-graph {:A #{}, :B #{}} {:A {:geometry :g_A}, :B {:geometry :g_B}}))
+        (= {:connections {:node-1 #{:node-2}, :node-2 #{:node-1}},
+            :nodes #{:node-1 :node-2},
+            :data {:node-2 {:geometry :g_B}, :node-1 {:geometry :g_A}}}
+           (as-graph {:A #{:B}, :B #{:A}} {:A {:geometry :g_A}, :B {:geometry :g_B}}))
+        (= {:connections {:node-3 #{:node-1}, :node-2 #{:node-1}, :node-1 #{:node-2 :node-3}},
+            :nodes #{:node-2 :node-1 :node-3},
+            :data {:node-3 {:geometry :g_C}, :node-2 {:geometry :g_B}, :node-1 {:geometry :g_A}}}
+           (as-graph {:A #{:B :C}, :B #{:A}, :C #{:A}} {:A {:geometry :g_A}, :B {:geometry :g_B}, :C {:geometry :g_C}}))))
