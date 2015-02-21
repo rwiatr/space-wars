@@ -19,7 +19,7 @@
 (defn trn [a b c d e f]
   (triangle (point a b) (point c d) (point e f)))
 
-(def pts (take 2000 (random-points))); (point 0 0) (point 800 0) (point 0 600) (point 800 600)))
+(def pts (take 1000 (random-points))); (point 0 0) (point 800 0) (point 0 600) (point 800 600)))
 (def bwt (bowyer-watson_2d pts :boundries #{(triangle 100 100 500 100 500 500) (triangle 100 100 100 500 500 500)}))
                                                ;#{(triangle (point -100000 -100000) (point 100000 -100000) (point 0 100000))})))
 (def p->t (point->triangles bwt))

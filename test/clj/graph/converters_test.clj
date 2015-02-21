@@ -108,17 +108,17 @@
   (testing "building a graph from valid data"
     (is (= {:connections {},
             :nodes #{:node-1},
-            :data {:node-1 {:geometry :g_A}}}
-           (as-graph {:A #{}} {:A {:geometry :g_A}})))
+            :data {:node-1 {:geometry :g_A, :point :A}}}
+           (as-graph {:A #{}} {:A {:geometry :g_A, :point :A}})))
     (is (= {:connections {},
             :nodes #{:node-2 :node-1},
-            :data {:node-2 {:geometry :g_B}, :node-1 {:geometry :g_A}}}
-           (as-graph {:A #{}, :B #{}} {:A {:geometry :g_A}, :B {:geometry :g_B}})))
+            :data {:node-2 {:geometry :g_B, :point :B}, :node-1 {:geometry :g_A, :point :A}}}
+           (as-graph {:A #{}, :B #{}} {:A {:geometry :g_A, :point :A}, :B {:geometry :g_B, :point :B}})))
     (is (= {:connections {:node-1 #{:node-2}, :node-2 #{:node-1}},
             :nodes #{:node-1 :node-2},
-            :data {:node-2 {:geometry :g_B}, :node-1 {:geometry :g_A}}}
+            :data {:node-2 {:geometry :g_B, :point :B}, :node-1 {:geometry :g_A, :point :A}}}
            (as-graph {:A #{:B}, :B #{:A}} {:A {:geometry :g_A}, :B {:geometry :g_B}})))
     (is  (= {:connections {:node-3 #{:node-1}, :node-2 #{:node-1}, :node-1 #{:node-2 :node-3}},
              :nodes #{:node-2 :node-1 :node-3},
-             :data {:node-3 {:geometry :g_C}, :node-2 {:geometry :g_B}, :node-1 {:geometry :g_A}}}
-            (as-graph {:A #{:B :C}, :B #{:A}, :C #{:A}} {:A {:geometry :g_A}, :B {:geometry :g_B}, :C {:geometry :g_C}})))))
+             :data {:node-3 {:geometry :g_C, :point :C}, :node-2 {:geometry :g_B, :point :B}, :node-1 {:geometry :g_A, :point :A}}}
+            (as-graph {:A #{:B :C}, :B #{:A}, :C #{:A}} {:A {:geometry :g_A, :point :A}, :B {:geometry :g_B, :point :B}, :C {:geometry :g_C, :point :C}})))))

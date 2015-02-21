@@ -70,7 +70,8 @@
                               nds (map point->node-m (point->point-mm p))
                               gm (:geometry (point->polygon-m p))]
                           (swap! g #(apply g-connect-to-many % n nds))
-                          (swap! g g-add-prop n :geometry gm))))
+                          (swap! g g-add-prop n :geometry gm)
+                          (swap! g g-add-prop n :point p))))
      @g)))
 
 
