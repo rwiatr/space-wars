@@ -44,6 +44,7 @@
   "choose two items with biggest cost-fn"
   [items]
   (let [pairs (for [a items, b items :when (not (identical? a b))] (vector a b))] ;; TODO refactor for into more efficient
+    (if (empty? pairs) (throw (Exception. (str "Can't build any pairs from input [" (clojure.string/join "," items) "]"))))
     (loop [pair (first pairs)
            cost (cost-fn (first pair) (second pair))
            pairs (rest pairs)]
