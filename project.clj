@@ -1,7 +1,6 @@
 (defproject space-wars "0.1.0-SNAPSHOT"
   :source-paths ["src/clj"]
   :test-paths   ["test/clj"]
-
   :dependencies [[pjstadig/humane-test-output "0.6.0"]
                  [quil "2.2.4"]
                  [org.clojure/clojure "1.6.0"]
