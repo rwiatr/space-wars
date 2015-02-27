@@ -1,5 +1,5 @@
 (ns spatial.spattree
-  (:use [geom.bbox :refer [area, bbox, bbox-max, bbox-xy, contained?]])
+  (:use [geom.bbox :refer [area, bbox, bbox-max, bbox-xy, contained?, intersect?]])
   (:gen-class))
 
 (defn- node? [node]
@@ -11,8 +11,14 @@
 (defn- succ [node]
   (:sub node))
 
+(defn- succ-node [node]
+  (filter node? (:sub node)))
+
 (defn- contains-bbox? [node value]
   (contained? (:bbox node) (:bbox value)))
+
+(defn- intersect-bbox? [node value]
+  (intersect? (:bbox node) (:bbox value)))
 
 (defn- multi-bbox-max [bbox & bboxs]
   (if (nil? bbox) (throw (Exception. "bbox can't be nil")))
@@ -56,8 +62,9 @@
             (recur next-pair next-cost (rest pairs))
             (recur pair cost (rest pairs))))))))
 
-(defn split-node [{items :sub}]
+(defn split-node
   "splits items into two nodes with optimal bbox"
+  [{items :sub}]
   (let [[seed1, seed2] (choose-seeds items)]
     (loop [node1 (create-node seed1)
            node2 (create-node seed2)
@@ -68,8 +75,9 @@
           (recur (into-node node1 (first items)) node2 (rest items))
           (recur (into-node node2 (first items)) node1 (rest items)))))))
 
-(defn rebuild [new old path split]
+(defn rebuild
   "rebuilds the path in the tree by updating every item on the path"
+  [new old path split]
   (loop [new new
          old old
          path path]
@@ -86,56 +94,27 @@
                                                        (update-in [:sub] conj new2))))]
               (recur updated head (rest path)))))))))
 
-(defn ok-to-add? [node properties]
-  (> (:split-size properties) (count (:values node))))
-
-(defn- min-size-node [nodes]
-  (loop [min-node (first nodes)
-         nodes nodes]
-    (if (empty? nodes) min-node
-      (if (> (count (:sub min-node)) (count (:sub (first min-node))))
-        (recur (first min-node) (rest nodes))
-        (recur min-node (rest nodes))))))
-
-(defn- bbox-extension-cost [b1 b2]
-  (- (area (bbox-max b1 b2) (area b1))))
-
-(defn- into-node2
-  ([node value properties path]
-   (if-let [children (not-empty (filter node? (succ node)))]
-     (let [notin (println children)
-           fit (or (not-empty (filter #(contains-bbox? % value) children)) ; bbox perfect match
-                   (apply min-key #(bbox-extension-cost % (:bbox value)) children)) ; bbox extension cheapest
-           notin (println fit)
-           fit (apply min-key #(count (succ %)) fit)] ; minimum children
-       (if-let [target (first fit)]
-         (recur target value properties (cons node path))))
-     (let [new-node (into-node node value)]
-       (rebuild new-node node path)))))
-(comment
-  (def properties {:split-size 3})
-  (def root {:bbox (bbox-xy 0 0 1000 1000) :sub #{}})
-  (def root2 (into-node root (create-leaf :2 (bbox-xy 20 20 120 120)) properties (list)))
-  (def root3 (into-node root2 (create-leaf :3 (bbox-xy 20 20 120 120)) properties (list)))
-  (def root4 (into-node root3 (create-leaf :4 (bbox-xy 20 20 120 120)) properties (list)))
-  (def root5 (into-node root4 (create-leaf :5 (bbox-xy 20 20 120 120)) properties (list)))
-  (def root6 (into-node root5 (create-leaf :6 (bbox-xy 20 20 120 120)) properties (list)))
-  root
-  root2
-  root3
-  root4
-  root5
-  root6
-  )
-
-(defn tree [& {:keys [split-size, val-factory-fn]
-               :or {split-size 5
-                    val-factory-fn identity}}]
-  {:root (create-node) :properties {:split-size split-size
-                                    :val-factory val-factory-fn}})
+(defn insert
+  ([target value split] (insert target value (list) split))
+  ([target value path split]
+    (if-let [fit (or (not-empty (filter #(contains-bbox? % value) (succ-node target)))
+                     (not-empty (filter #(intersect-bbox? % value) (succ-node target)))
+                     (not-empty (succ-node target)))]
+      (recur (first (->> fit
+                      (min-key #(area-diff % (into-node % value)))
+                      (min-key #(count (succ-node %)))))
+             value
+             (cons target path)
+             split)
+      (rebuild (into-node target value) target path split))))
 
 (defn t-add [tree value]
-  (assoc tree :root (into-node (:root tree)
-                               ((:val-factory tree) value)
-                               (:properties tree)
-                               (list))))
+  (assoc tree :root (insert (:root tree)
+                            ((:node-factory-fn tree) value)
+                            (:split-size tree))))
+
+(defn tree [& {:keys [split-size, node-factory-fn]
+               :or {split-size 5
+                    node-factory-fn identity}}]
+  {:root (create-node) :properties {:split-size split-size
+                                    :node-factory-fn node-factory-fn}})
