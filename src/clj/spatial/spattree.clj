@@ -37,9 +37,6 @@
   ([& values] (apply into-node (create-node) values))
   ([] {:sub #{}}))
 
-(defn create-leaf [value bbox]
-  {:value value, :bbox bbox})
-
 ;; splitting algorithm
 (defn cost-fn [{bbox1 :bbox} {bbox2 :bbox}]
   (- (area (bbox-max bbox1 bbox2)) (area bbox1) (area bbox2)))
@@ -92,6 +89,12 @@
                                                        (update-in [:sub] disj old)
                                                        (update-in [:sub] conj new1)
                                                        (update-in [:sub] conj new2))))]
+              (recur updated head (rest path)))
+            (let [new new
+                  head (first path)
+                  updated (apply create-node (succ (-> head
+                                                       (update-in [:sub] disj old)
+                                                       (update-in [:sub] conj new))))]
               (recur updated head (rest path)))))))))
 
 (defn insert

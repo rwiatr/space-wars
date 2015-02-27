@@ -96,13 +96,21 @@
                                        {:bbox (bbox-xy 20 10 35 20)} {:bbox (bbox-xy 20 0 30 50)})
                  old-node (create-node {:bbox (bbox-xy 0 10 15 20)})
                  path (list (create-node old-node (create-node {:bbox (bbox -5 1 20 20)})))]
+             (rebuild new-node old-node path 3)))))
+  (testing "don't splits new node and rebuild path"
+    (is (= (create-node (create-node {:bbox (bbox -5 1 20 20)})
+                        (create-node {:bbox (bbox-xy 0 10 15 20)}
+                                     {:bbox (bbox-xy 5 0 15 50)}))
+           (let [new-node (create-node {:bbox (bbox-xy 0 10 15 20)} {:bbox (bbox-xy 5 0 15 50)})
+                 old-node (create-node {:bbox (bbox-xy 0 10 15 20)})
+                 path (list (create-node old-node (create-node {:bbox (bbox -5 1 20 20)})))]
              (rebuild new-node old-node path 3))))))
 
 (deftest test.insert
   (testing "insertion into empty root node"
     (is (= (create-node {:bbox (bbox -5 1 20 20) :value 1})
            (insert (create-node) {:bbox (bbox -5 1 20 20) :value 1} 3))))
-  (testing "insertion into root node with values does not split"
+  (testing "insertion into root node with values and does not split"
     (is (= (create-node {:bbox (bbox 5 0 15 50) :value 1}
                         {:bbox (bbox -5 1 20 20) :value 2})
            (insert (create-node {:bbox (bbox 5 0 15 50) :value 1})
@@ -113,7 +121,7 @@
            (insert (create-node {:bbox (bbox 5 0 15 50) :value 1}
                                 {:bbox (bbox -5 1 20 20) :value 2})
                    {:bbox (bbox -5 -10 20 20) :value 3} 3))))
-  (testing "insertion into root node with values splits the node"
+  (testing "insertion into root node with values and splits the node"
     (is (= (create-node (create-node {:bbox (bbox -5 1 20 20) :value 2}
                                      {:bbox (bbox -5 -10 20 20) :value 3})
                         (create-node {:bbox (bbox 5 0 15 50) :value 1}
@@ -121,6 +129,17 @@
            (insert (create-node {:bbox (bbox 5 0 15 50) :value 1}
                                 {:bbox (bbox -5 1 20 20) :value 2}
                                 {:bbox (bbox -5 -10 20 20) :value 3})
-                   {:bbox (bbox 0 0 10 25) :value 4} 3)))))
+                   {:bbox (bbox 0 0 10 25) :value 4} 3))))
+  (testing "insertion into child node with values and does not split"
+    (is (= (create-node (create-node {:bbox (bbox -5 1 20 20) :value 2}
+                                     {:bbox (bbox -5 -10 20 20) :value 3})
+                        (create-node {:bbox (bbox 5 0 15 50) :value 1}
+                                     {:bbox (bbox 0 0 10 25) :value 4}
+                                     {:bbox (bbox 5 5 2 2) :value 5}))
+           (insert (create-node (create-node {:bbox (bbox -5 1 20 20) :value 2}
+                                             {:bbox (bbox -5 -10 20 20) :value 3})
+                                (create-node {:bbox (bbox 5 0 15 50) :value 1}
+                                             {:bbox (bbox 0 0 10 25) :value 4}))
+                   {:bbox (bbox 5 5 2 2) :value 5} 3)))))
 
 
