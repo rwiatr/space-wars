@@ -14,8 +14,6 @@
 (defn- contains-bbox? [node value]
   (contained? (:bbox node) (:bbox value)))
 
-(defn- node-area [node] (area (:bbox node)))
-
 (defn- multi-bbox-max [bbox & bboxs]
   (if (nil? bbox) (throw (Exception. "bbox can't be nil")))
   (if-let [bbox2 (first bboxs)]
@@ -40,6 +38,9 @@
 (defn cost-fn [{bbox1 :bbox} {bbox2 :bbox}]
   (- (area (bbox-max bbox1 bbox2)) (area bbox1) (area bbox2)))
 
+(defn- area-diff [{bbox1 :bbox} {bbox2 :bbox}]
+  (- (area bbox1) (area bbox2)))
+
 (defn choose-seeds
   "choose two items with biggest cost-fn"
   [items]
@@ -62,7 +63,8 @@
            node2 (create-node seed2)
            items items]
       (if (empty? items) (vector node1 node2)
-        (if (< (- (node-area (into-node node1 (first items))) (node-area node1)) (- (node-area (into-node node2 (first items))) (node-area node2)))
+        (if (< (area-diff (into-node node1 (first items)) node1)
+               (area-diff (into-node node2 (first items)) node2))
           (recur (into-node node1 (first items)) node2 (rest items))
           (recur (into-node node2 (first items)) node1 (rest items)))))))
 
@@ -73,15 +75,16 @@
          path path]
     (let [for-split (> (count (succ new)) split)
           is-root (empty? path)]
-      (case
-        (and for-split is-root) (let [[new1 new2] (split-node (succ new))] (create-node new1 new2))
-        is-root new
-        for-split (let [[new1 new2] (split-node (succ new))
-                        head (first path)
-                        updated (-> head
-                                    (update-in [:sub] disj old)
-                                    (update-in [:sub] conj new))]
-                    (recur updated head (rest path)))))))
+      (if (and for-split is-root) (let [[new1 new2] (split-node new)] (create-node new1 new2))
+        (if is-root new
+          (if for-split
+            (let [[new1 new2] (split-node new)
+                  head (first path)
+                  updated (apply create-node (succ (-> head
+                                                       (update-in [:sub] disj old)
+                                                       (update-in [:sub] conj new1)
+                                                       (update-in [:sub] conj new2))))]
+              (recur updated head (rest path)))))))))
 
 (defn ok-to-add? [node properties]
   (> (:split-size properties) (count (:values node))))
@@ -133,6 +136,6 @@
 
 (defn t-add [tree value]
   (assoc tree :root (into-node (:root tree)
-                                 ((:val-factory tree) value)
-                                 (:properties tree)
-                                 (list))))
+                               ((:val-factory tree) value)
+                               (:properties tree)
+                               (list))))
