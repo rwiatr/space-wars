@@ -6,9 +6,6 @@
 (defn- node? [node]
   (-> node :value nil?))
 
-(defn- leaf? [node]
-  (not (node? node)))
-
 (defn- succ [node]
   (:sub node))
 

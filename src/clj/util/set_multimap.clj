@@ -5,11 +5,6 @@
 
 (defn multimap [] {})
 
-(defmacro apply-rec [f x args]
-   `(loop [x# ~x, args# ~args]
-      (if (empty? args#) x#
-        (recur (~f x# (first args#) (rest args#))))))
-
 (defmacro apply-rec2 [f x args]
    `(loop [x# ~x, args# ~args]
       (if (empty? args#) x#
