@@ -41,11 +41,21 @@
 
 (defn- area-diff [{bbox1 :bbox} {bbox2 :bbox}]
   (- (area bbox1) (area bbox2)))
+(def k [:a :b :c :d])
+
+(defn- s-seq [s]
+  (if (empty? s) nil
+    (cons s (lazy-seq (s-seq (rest s))))))
+
+(defn- p-seq [s]
+  (apply concat
+         (for [ss (s-seq s) :while (not-empty (rest ss))]
+           (for [p (rest ss)] [(first ss) p]))))
 
 (defn choose-seeds
   "choose two items with biggest cost-fn"
   [items]
-  (let [pairs (for [a items, b items :when (not (identical? a b))] (vector a b))] ;; TODO refactor for into more efficient
+  (let [pairs (p-seq items)] ;; TODO refactor for into more efficient
     (if (empty? pairs) (throw (Exception. (str "Can't build any pairs from input [" (clojure.string/join "," items) "]"))))
     (loop [pair (first pairs)
            cost (cost-fn (first pair) (second pair))
