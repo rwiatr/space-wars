@@ -2,6 +2,7 @@
   (:require [clojure.set :refer :all]
             [clojure.algo.generic.functor :refer [fmap]]
             [util.set_multimap :refer [mm-reverse mm-index mm-merge mm-to-map mm-fmap mm-kv-fmap mm-filter del mm-kv-filter]]
+            [util.key_gen :refer [key-mem inc-key]]
             [geom.point :refer [point]]
             [geom.triangle :refer [triangle points to-circumcircle-center]]
             [geom.polygon :refer [polygon]]
@@ -47,18 +48,6 @@
        (mm-reverse)
        (mm-fmap #(get point->polygon-indx %))
        (mm-filter some?)))
-
-(defn- key-mem [key-fn]
-  (let [ks (atom {})]
-    (fn [v]
-      (swap! ks #(if (% v) % (assoc % v (key-fn v))))
-      (@ks v))))
-
-(defn- inc-key [prefix]
-  (let [cnt (atom 0)]
-    (fn [v]
-      (swap! cnt inc)
-      (keyword (str prefix "-" @cnt)))))
 
 (defn as-graph
   ([point->point-mm point->polygon-m] (as-graph (key-mem (inc-key "node")) point->point-mm point->polygon-m))

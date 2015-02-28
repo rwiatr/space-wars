@@ -142,4 +142,23 @@
                                              {:bbox (bbox 0 0 10 25) :value 4}))
                    {:bbox (bbox 5 5 2 2) :value 5} 3)))))
 
-
+(deftest test.tree
+  (testing "creation"
+    (is (= {:root {:sub #{}}, :split-size 5, :node-factory-fn identity}
+           (tree)))
+    (is (= {:root {:sub #{}}, :split-size 10, :node-factory-fn zero?}
+           (tree :node-factory-fn zero? :split-size 10))))
+  (testing "add value"
+    (is (= {:root {:bbox (bbox 5 0 15 50)
+                   :sub #{{:bbox (bbox 5 0 15 50) :value 1}}}, :split-size 5, :node-factory-fn identity}
+           (tree-add (tree) {:bbox (bbox 5 0 15 50) :value 1}))))
+  (testing "breath first seq"
+    (is (= (list [(bbox 1 0 19 50) 0]
+                 [(bbox 1 0 19 50) 1] [(bbox 3 0 16 50) 1]
+                 [(bbox 5 0 15 50) 2] [(bbox 2 0 15 50) 2] [(bbox 1 0 15 50) 2] [(bbox 3 0 15 50) 2] [(bbox 4 0 15 50) 2])
+           (tree-breath-first-bbox-seq (tree-add (tree :split-size 3)
+                                                 {:bbox (bbox 1 0 15 50) :value 1}
+                                                 {:bbox (bbox 2 0 15 50) :value 2}
+                                                 {:bbox (bbox 3 0 15 50) :value 3}
+                                                 {:bbox (bbox 4 0 15 50) :value 4}
+                                                 {:bbox (bbox 5 0 15 50) :value 5}))))))

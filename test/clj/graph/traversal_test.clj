@@ -30,3 +30,31 @@
     (is (= '(a b c) (breath-first-seq 'a {'a '(b c)
                                           'b '(a c)
                                           'c '(a b)})))))
+
+(deftest test.breath-first-with-level
+  (testing "one element graph"
+    (is (= '([a 0]) (breath-first-seq 'a {} :with-level true))))
+  (testing "one element with loop graph"
+    (is (= '([a 0]) (breath-first-seq 'a {'a '(a)} :with-level true))))
+  (testing "two element directed graph"
+    (is (= '([a 0] [b 1]) (breath-first-seq 'a {'a '(b)} :with-level true))))
+  (testing "two element undirected graph"
+    (is (= '([a 0] [b 1]) (breath-first-seq 'a {'a '(b) 'b '(a)} :with-level true))))
+  (testing "three element directed graph"
+    (is (= '([a 0] [b 1] [c 2]) (breath-first-seq 'a {'a '(b) 'b '(c)} :with-level true)))
+    (is (= '([a 0] [b 1] [c 2]) (breath-first-seq 'a {'a '(b) 'b '(c) 'c '(a)} :with-level true)))
+    (is (= '([a 0] [b 1] [c 1]) (breath-first-seq 'a {'a '(b c)} :with-level true)))
+    (is (= '([a 0] [b 1] [c 1]) (breath-first-seq 'a {'a '(b c) 'c '(b)} :with-level true))))
+  (testing "three element undirected graph"
+    (is (= '([a 0] [b 1] [c 2]) (breath-first-seq 'a {'a '(b)
+                                                      'b '(a c)
+                                                      'c '(b)} :with-level true)))
+    (is (= '([a 0] [b 1] [c 1]) (breath-first-seq 'a {'a '(b c)
+                                                      'b '(a c)
+                                                      'c '(a b)} :with-level true)))
+    (is (= '([a 0] [b 1] [c 1]) (breath-first-seq 'a {'a '(b c)
+                                                      'b '(a)
+                                                      'c '(a)} :with-level true)))
+    (is (= '([a 0] [b 1] [c 1]) (breath-first-seq 'a {'a '(b c)
+                                                      'b '(a c)
+                                                      'c '(a b)} :with-level true)))))

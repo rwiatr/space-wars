@@ -1,5 +1,6 @@
 (ns spatial.spattree
-  (:use [geom.bbox :refer [area, bbox, bbox-max, bbox-xy, contained?, intersect?]])
+  (:use [geom.bbox :refer [area, bbox, bbox-max, bbox-xy, contained?, intersect?]]
+        [graph.traversal :refer [breath-first-seq]])
   (:gen-class))
 
 (defn- node? [node]
@@ -100,24 +101,36 @@
 (defn insert
   ([target value split] (insert target value (list) split))
   ([target value path split]
-    (if-let [fit (or (not-empty (filter #(contains-bbox? % value) (succ-node target)))
-                     (not-empty (filter #(intersect-bbox? % value) (succ-node target)))
-                     (not-empty (succ-node target)))]
-      (recur (first (->> fit
-                      (min-key #(area-diff % (into-node % value)))
-                      (min-key #(count (succ-node %)))))
-             value
-             (cons target path)
-             split)
-      (rebuild (into-node target value) target path split))))
-
-(defn t-add [tree value]
-  (assoc tree :root (insert (:root tree)
-                            ((:node-factory-fn tree) value)
-                            (:split-size tree))))
+   (if-let [fit (or (not-empty (filter #(contains-bbox? % value) (succ-node target)))
+                    (not-empty (filter #(intersect-bbox? % value) (succ-node target)))
+                    (not-empty (succ-node target)))]
+     (recur (first (->> fit
+                        (min-key #(area-diff % (into-node % value)))
+                        (min-key #(count (succ-node %)))))
+            value
+            (cons target path)
+            split)
+     (rebuild (into-node target value) target path split))))
 
 (defn tree [& {:keys [split-size, node-factory-fn]
                :or {split-size 5
                     node-factory-fn identity}}]
-  {:root (create-node) :properties {:split-size split-size
-                                    :node-factory-fn node-factory-fn}})
+  {:root (create-node)
+   :split-size split-size
+   :node-factory-fn node-factory-fn})
+
+(defn tree-add [tree & values]
+  (assoc tree :root
+    (let [split (:split-size tree)
+          factory (:node-factory-fn tree)]
+      (loop [root (:root tree)
+             values values]
+        (if-let [value (first values)]
+          (recur (insert root (factory value) split)
+                 (rest values))
+          root)))))
+
+(defn tree-breath-first-bbox-seq [tree]
+  (for [[{bbox :bbox} i] (breath-first-seq (:root tree) succ :with-level true)] [bbox i]))
+
+(defn tree-find [tree bbox])
