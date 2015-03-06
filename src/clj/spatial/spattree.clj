@@ -33,7 +33,7 @@
 
 (defn create-node
   ([& values] (apply into-node (create-node) values))
-  ([] {:sub #{}}))
+  ([] {:sub #{} :bottom-leafs 0}))
 
 ;; splitting algorithm
 (defn cost-fn [{bbox1 :bbox} {bbox2 :bbox}]

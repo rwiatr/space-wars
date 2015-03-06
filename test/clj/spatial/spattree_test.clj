@@ -44,28 +44,20 @@
 
 (deftest test.split-node
   (testing "split node into smaller pieces"
-    (is (= [{:bbox (bbox 0 0 110 110),
-             :sub
-             #{{:bbox (bbox 0 10 100 100)}
-               {:bbox (bbox 10 10 100 100)}
-               {:bbox (bbox 0 0 100 100)}
-               {:bbox (bbox 0 0 100 10)}}}
-            {:bbox (bbox 0 0 10 10),
-             :sub
-             #{{:bbox (bbox 0 0 10 5)}
-               {:bbox (bbox 0 0 10 10)}}}]
+    (is (= [(create-node{:bbox (bbox 0 10 100 100)}
+                               {:bbox (bbox 10 10 100 100)}
+                               {:bbox (bbox 0 0 100 100)}
+                               {:bbox (bbox 0 0 100 10)})
+            (create-node{:bbox (bbox 0 0 10 5)}
+                               {:bbox (bbox 0 0 10 10)})]
            (split-node (create-node {:bbox (bbox 0 0 10 10)} {:bbox (bbox 10 10 100 100)}
                                     {:bbox (bbox 0 0 10 5)} {:bbox (bbox 0 10 100 100)}
                                     {:bbox (bbox 0 0 10 10)} {:bbox (bbox 0 0 100 100)}
                                     {:bbox (bbox 0 0 100 10)} {:bbox (bbox 0 0 100 100)}))))
-    (is (= [{:bbox (bbox-xy 5 0 30 50),
-             :sub
-             #{{:bbox (bbox-xy 5 0 15 50)}
-               {:bbox (bbox-xy 20 0 30 50)}}}
-            {:bbox (bbox-xy 0 10 35 20),
-             :sub
-             #{{:bbox (bbox-xy 0 10 15 20)}
-               {:bbox (bbox-xy 20 10 35 20)}}}]
+    (is (= [(create-node {:bbox (bbox-xy 5 0 15 50)}
+                         {:bbox (bbox-xy 20 0 30 50)})
+            (create-node {:bbox (bbox-xy 0 10 15 20)}
+                         {:bbox (bbox-xy 20 10 35 20)})]
            (split-node (create-node {:bbox (bbox-xy 0 10 15 20)} {:bbox (bbox-xy 5 0 15 50)}
                                     {:bbox (bbox-xy 20 10 35 20)} {:bbox (bbox-xy 20 0 30 50)}))))))
 
@@ -144,13 +136,12 @@
 
 (deftest test.tree
   (testing "creation"
-    (is (= {:root {:sub #{}}, :split-size 5, :node-factory-fn identity}
+    (is (= {:root (create-node), :split-size 5, :node-factory-fn identity}
            (tree)))
-    (is (= {:root {:sub #{}}, :split-size 10, :node-factory-fn zero?}
+    (is (= {:root (create-node), :split-size 10, :node-factory-fn zero?}
            (tree :node-factory-fn zero? :split-size 10))))
   (testing "add value"
-    (is (= {:root {:bbox (bbox 5 0 15 50)
-                   :sub #{{:bbox (bbox 5 0 15 50) :value 1}}}, :split-size 5, :node-factory-fn identity}
+    (is (= {:root (into-node (create-node) {:bbox (bbox 5 0 15 50) :value 1}), :split-size 5, :node-factory-fn identity}
            (tree-add (tree) {:bbox (bbox 5 0 15 50) :value 1}))))
   (testing "breath first seq"
     (is (= (list [(bbox 1 0 19 50) 0]
