@@ -132,12 +132,14 @@
                    {:bbox (bbox 0 0 10 25) :value 4} 3))))
   (testing "insertion into child node with values and does not split"
     (is (= (create-node (create-node {:bbox (bbox -5 1 20 20) :value 2}
-                                     {:bbox (bbox -5 -10 20 20) :value 3})
+                                     {:bbox (bbox -5 -10 20 20) :value 3}
+                                     {:bbox (bbox 2 2 5 5) :value 0})
                         (create-node {:bbox (bbox 5 0 15 50) :value 1}
                                      {:bbox (bbox 0 0 10 25) :value 4}
                                      {:bbox (bbox 5 5 2 2) :value 5}))
            (insert (create-node (create-node {:bbox (bbox -5 1 20 20) :value 2}
-                                             {:bbox (bbox -5 -10 20 20) :value 3})
+                                             {:bbox (bbox -5 -10 20 20) :value 3}
+                                             {:bbox (bbox 2 2 5 5) :value 0})
                                 (create-node {:bbox (bbox 5 0 15 50) :value 1}
                                              {:bbox (bbox 0 0 10 25) :value 4}))
                    {:bbox (bbox 5 5 2 2) :value 5} 3)))))
