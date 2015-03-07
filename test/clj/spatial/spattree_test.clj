@@ -1,23 +1,24 @@
 (ns spatial.spattree-test
   (:require [clojure.test :refer :all]
             [spatial.spattree :refer :all]
-            [geom.bbox :refer :all]))
+            [geom.bbox :refer :all]
+            [util.set_multimap :refer :all]))
 
 (deftest test.node
   (testing "creation"
-    (is (= {:bottom-leafs 0 :sub #{}} (create-node)))
+    (is (= {:total-leafs 0 :sub #{}} (create-node)))
     (is (thrown-with-msg? Exception #"bbox can't be nil" (create-node {:v :a})))
-    (is (= {:bottom-leafs 1 :sub #{{:val 'value :bbox (bbox 0 0 100 100)}}, :bbox (bbox 0 0 100 100)}
+    (is (= {:total-leafs 1 :sub #{{:val 'value :bbox (bbox 0 0 100 100)}}, :bbox (bbox 0 0 100 100)}
            (create-node {:val 'value :bbox (bbox 0 0 100 100)})))
-    (is (= {:bottom-leafs 2 :sub #{{:val 'v1 :bbox (bbox 0 0 100 100)}
-                                   {:val 'v2 :bbox (bbox -150 -10 -5 -5)}}, :bbox (bbox -150 -10 250 110)}
+    (is (= {:total-leafs 2 :sub #{{:val 'v1 :bbox (bbox 0 0 100 100)}
+                                  {:val 'v2 :bbox (bbox -150 -10 -5 -5)}}, :bbox (bbox -150 -10 250 110)}
            (create-node {:val 'v1 :bbox (bbox 0 0 100 100)}
                         {:val 'v2 :bbox (bbox -150 -10 -5 -5)}))))
   (testing "modification"
-    (is (= {:bottom-leafs 1 :sub #{{:val 'value :bbox (bbox 0 0 100 100)}}, :bbox (bbox 0 0 100 100)}
+    (is (= {:total-leafs 1 :sub #{{:val 'value :bbox (bbox 0 0 100 100)}}, :bbox (bbox 0 0 100 100)}
            (-> (create-node) (into-node {:val 'value :bbox (bbox 0 0 100 100)}))))
-    (is (= {:bottom-leafs 2 :sub #{{:val 'v1 :bbox (bbox 0 0 100 100)}
-                                   {:val 'v2 :bbox (bbox -150 -10 -5 -5)}}, :bbox (bbox -150 -10 250 110)}
+    (is (= {:total-leafs 2 :sub #{{:val 'v1 :bbox (bbox 0 0 100 100)}
+                                  {:val 'v2 :bbox (bbox -150 -10 -5 -5)}}, :bbox (bbox -150 -10 250 110)}
            (-> (create-node) (into-node {:val 'v1 :bbox (bbox 0 0 100 100)}
                                         {:val 'v2 :bbox (bbox -150 -10 -5 -5)}))))))
 
@@ -46,7 +47,7 @@
   (testing "split node into smaller pieces"
     (is (= [(create-node {:bbox (bbox-xy 0 10 15 20)})
             (create-node {:bbox (bbox-xy 5 20 15 50)})]
-            (split-node (create-node {:bbox (bbox-xy 0 10 15 20)} {:bbox (bbox-xy 5 20 15 50)}))))
+           (split-node (create-node {:bbox (bbox-xy 0 10 15 20)} {:bbox (bbox-xy 5 20 15 50)}))))
     (is (= [(create-node {:bbox (bbox 0 10 100 100)}
                          {:bbox (bbox 10 10 100 100)}
                          {:bbox (bbox 0 0 100 100)}
@@ -127,18 +128,18 @@
                    {:bbox (bbox 0 0 10 25) :value 4} 3))))
   (testing "insertion into child node with values and does not split"
     (is (= (create-node (create-node {:bbox (bbox -5 1 20 20) :value 2}
-                                     {:bbox (bbox -5 -10 20 20) :value 3}
-                                     {:bbox (bbox 2 2 5 5) :value 0})
+                                     {:bbox (bbox -5 -10 20 20) :value 3})
                         (create-node {:bbox (bbox 5 0 15 50) :value 1}
                                      {:bbox (bbox 0 0 10 25) :value 4}
-                                     {:bbox (bbox 5 5 2 2) :value 5}))
+                                     {:bbox (bbox 25 5 2 2) :value 5}))
            (insert (create-node (create-node {:bbox (bbox -5 1 20 20) :value 2}
-                                             {:bbox (bbox -5 -10 20 20) :value 3}
-                                             {:bbox (bbox 2 2 5 5) :value 0})
+                                             {:bbox (bbox -5 -10 20 20) :value 3})
                                 (create-node {:bbox (bbox 5 0 15 50) :value 1}
                                              {:bbox (bbox 0 0 10 25) :value 4}))
-                   {:bbox (bbox 5 5 2 2) :value 5} 3)))))
+                   {:bbox (bbox 25 5 2 2) :value 5} 3)))))
 
+
+(mm-index (multimap) first second [[1 :a] [2 :b] [2 :c]])
 (deftest test.tree
   (testing "creation"
     (is (= {:root (create-node), :split-size 5, :node-factory-fn identity}
@@ -149,12 +150,14 @@
     (is (= {:root (into-node (create-node) {:bbox (bbox 5 0 15 50) :value 1}), :split-size 5, :node-factory-fn identity}
            (tree-add (tree) {:bbox (bbox 5 0 15 50) :value 1}))))
   (testing "breath first seq"
-    (is (= (list [(bbox 1 0 19 50) 0]
-                 [(bbox 1 0 19 50) 1] [(bbox 3 0 16 50) 1]
-                 [(bbox 5 0 15 50) 2] [(bbox 2 0 15 50) 2] [(bbox 1 0 15 50) 2] [(bbox 3 0 15 50) 2] [(bbox 4 0 15 50) 2])
-           (tree-breath-first-bbox-seq (tree-add (tree :split-size 3)
-                                                 {:bbox (bbox 1 0 15 50) :value 1}
-                                                 {:bbox (bbox 2 0 15 50) :value 2}
-                                                 {:bbox (bbox 3 0 15 50) :value 3}
-                                                 {:bbox (bbox 4 0 15 50) :value 4}
-                                                 {:bbox (bbox 5 0 15 50) :value 5}))))))
+    (is (= (mm-index (multimap) first second
+                     [[(bbox 1 0 19 50) 0]
+                      [(bbox 1 0 16 50) 1] [(bbox 3 0 17 50) 1]
+                      [(bbox 5 0 15 50) 2] [(bbox 2 0 15 50) 2] [(bbox 1 0 15 50) 2] [(bbox 3 0 15 50) 2] [(bbox 4 0 15 50) 2]])
+           (mm-index (multimap) first second
+                     (tree-breath-first-bbox-seq (tree-add (tree :split-size 3)
+                                                           {:bbox (bbox 1 0 15 50) :value 1}
+                                                           {:bbox (bbox 2 0 15 50) :value 2}
+                                                           {:bbox (bbox 3 0 15 50) :value 3}
+                                                           {:bbox (bbox 4 0 15 50) :value 4}
+                                                           {:bbox (bbox 5 0 15 50) :value 5})))))))

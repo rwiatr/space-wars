@@ -29,12 +29,12 @@
     (recur (-> node
                (update-in [:sub] conj (first values))
                (update-in [:bbox] (partial multi-bbox-max (:bbox (first values))))
-               (update-in [:bottom-leafs] + (or (:bottom-leafs (first values)) 1)))
+               (update-in [:total-leafs] + (or (:total-leafs (first values)) 1)))
            (rest values))))
 
 (defn create-node
   ([& values] (apply into-node (create-node) values))
-  ([] {:sub #{} :bottom-leafs 0}))
+  ([] {:sub #{} :total-leafs 0}))
 
 ;; splitting algorithm
 (defn cost-fn [{bbox1 :bbox} {bbox2 :bbox}]
