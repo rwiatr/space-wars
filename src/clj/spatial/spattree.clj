@@ -6,17 +6,23 @@
 (defn- node? [node]
   (-> node :value nil?))
 
+(defn- leaf? [node]
+  (not (node? node)))
+
 (defn- succ [node]
   (:sub node))
 
 (defn- succ-node [node]
   (filter node? (:sub node)))
 
-(defn- contains-bbox? [node value]
-  (contained? (:bbox node) (:bbox value)))
+(defn bbox-interact? [interact? {b1 :bbox} {b2 :bbox}]
+  (interact? b1 b2))
 
-(defn- intersect-bbox? [node value]
-  (intersect? (:bbox node) (:bbox value)))
+(defn contains-bbox? [node value]
+  (bbox-interact? contained? node value))
+
+(defn intersect-bbox? [node value]
+  (bbox-interact? intersect? node value))
 
 (defn- multi-bbox-max [bbox & bboxs]
   (if (nil? bbox) (throw (Exception. "bbox can't be nil")))
@@ -120,12 +126,31 @@
             split)
      (rebuild (into-node target value) target path split))))
 
+(defn successors-interacting-bbox [interaction node bbox]
+  (for [child (:sub node) :when (interaction child bbox)] child))
+
+(defn leafs-interacting-bbox
+  ([interaction root bbox] (leafs-interacting-bbox interaction (list root) bbox (list)))
+  ([interaction nodes bbox result]
+   (if (empty? nodes) result
+     (let [node (first nodes)
+           children (successors-interacting-bbox interaction node bbox)]
+       (recur interaction
+              (concat (rest nodes) (filter node? children))
+              bbox
+              (into result (filter leaf? children)))))))
+
+(defn bbox-interacting-leafs [interaction root bbox]
+  (leafs-interacting-bbox #(interaction %2 %1) bbox))
+
 (defn tree [& {:keys [split-size, node-factory-fn]
                :or {split-size 5
                     node-factory-fn identity}}]
   {:root (create-node)
    :split-size split-size
    :node-factory-fn node-factory-fn})
+
+(defn tree-get [tree bbox])
 
 (defn tree-add [tree & values]
   (assoc tree :root

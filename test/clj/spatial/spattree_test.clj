@@ -138,8 +138,52 @@
                                              {:bbox (bbox 0 0 10 25) :value 4}))
                    {:bbox (bbox 25 5 2 2) :value 5} 3)))))
 
+(deftest test.successors-interacting-bbox
+  (testing "returns all children containing the bbox or an empty list"
+    (is (empty? (successors-interacting-bbox (create-node {:bbox (bbox -5 1 20 20) :value 1}
+                                                          {:bbox (bbox 5 -10 20 20) :value 2})
+                                             contains-bbox?
+                                             {:bbox (bbox -50 1 20 20)})))
+    (is (= (list {:bbox (bbox -5 1 20 20) :value 1})
+           (successors-interacting-bbox contains-bbox?
+                                        (create-node {:bbox (bbox -5 1 20 20) :value 1}
+                                                     {:bbox (bbox 5 -10 20 20) :value 2})
+                                        {:bbox (bbox -5 1 20 20)})))
+    (is (= (list {:bbox (bbox -5 1 20 20) :value 1})
+           (successors-interacting-bbox contains-bbox?
+                                        (create-node {:bbox (bbox -5 1 20 20) :value 1}
+                                                     {:bbox (bbox 5 -10 20 20) :value 2})
+                                        {:bbox (bbox 0 1 15 20)})))
+    (is (= #{{:bbox (bbox -5 1 20 20) :value 1}
+             {:bbox (bbox 5 -10 20 20) :value 2}}
+           (into #{} (successors-interacting-bbox contains-bbox?
+                                                  (create-node {:bbox (bbox -5 1 20 20) :value 1}
+                                                               {:bbox (bbox 5 -10 20 20) :value 2})
+                                                  {:bbox (bbox 5 1 10 5)}))))))
 
-(mm-index (multimap) first second [[1 :a] [2 :b] [2 :c]])
+(deftest test.leafs-interacting-bbox
+  (testing "returns only leafs that contain bbox or nothing"
+    (is (empty? (leafs-interacting-bbox (create-node (create-node {:bbox (bbox -5 1 20 20) :value 1}
+                                                                  {:bbox (bbox 5 -10 20 20) :value 2}))
+                                        contains-bbox?
+                                        {:bbox (bbox -50 1 20 20)})))
+    (is (= (list {:bbox (bbox -5 1 20 20) :value 1})
+           (leafs-interacting-bbox contains-bbox?
+                                   (create-node (create-node {:bbox (bbox -5 1 20 20) :value 1}
+                                                             {:bbox (bbox 5 -10 20 20) :value 2}))
+                                   {:bbox (bbox -5 1 20 20)})))
+    (is (= (list {:bbox (bbox -5 1 20 20) :value 1})
+           (leafs-interacting-bbox contains-bbox?
+                                   (create-node (create-node {:bbox (bbox -5 1 20 20) :value 1}
+                                                             {:bbox (bbox 5 -10 20 20) :value 2}))
+                                   {:bbox (bbox 0 1 15 20)})))
+    (is (= #{{:bbox (bbox -5 1 20 20) :value 1}
+             {:bbox (bbox 5 -10 20 20) :value 2}}
+           (into #{} (leafs-interacting-bbox contains-bbox?
+                                             (create-node (create-node {:bbox (bbox -5 1 20 20) :value 1}
+                                                                       {:bbox (bbox 5 -10 20 20) :value 2}))
+                                             {:bbox (bbox 5 1 10 5)}))))))
+
 (deftest test.tree
   (testing "creation"
     (is (= {:root (create-node), :split-size 5, :node-factory-fn identity}
