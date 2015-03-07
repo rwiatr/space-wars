@@ -19,7 +19,9 @@
 
 (defn area [bbox] (* (:width bbox) (:height bbox)))
 
-(defn intersect? [bbox1 bbox2]
+(defn intersect?
+  "returns true if bbox1 has a common part with bbox2 - this includes contained?"
+  [bbox1 bbox2]
   (and
    (<= (* 2 (abs (- (:x bbox1) (:x bbox2)))) (+ (:width bbox1) (:width bbox2)))
    (<= (* 2 (abs (- (:y bbox1) (:y bbox2)))) (+ (:height bbox1) (:height bbox2)))))

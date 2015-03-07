@@ -21,7 +21,7 @@
 (defn contains-bbox? [node value]
   (bbox-interact? contained? node value))
 
-(defn intersect-bbox? [node value]
+(defn intersects-bbox? [node value]
   (bbox-interact? intersect? node value))
 
 (defn- multi-bbox-max [bbox & bboxs]
@@ -116,7 +116,7 @@
   ([target value split] (insert target value (list) split))
   ([target value path split]
    (if-let [fit (or (not-empty (filter #(contains-bbox? % value) (succ-node target)))
-                    (not-empty (filter #(intersect-bbox? % value) (succ-node target)))
+                    (not-empty (filter #(intersects-bbox? % value) (succ-node target)))
                     (not-empty (succ-node target)))]
      (recur (first (->> fit
                         (min-key #(area-diff % (into-node % value)))
@@ -140,9 +140,6 @@
               bbox
               (into result (filter leaf? children)))))))
 
-(defn bbox-interacting-leafs [interaction root bbox]
-  (leafs-interacting-bbox #(interaction %2 %1) bbox))
-
 (defn tree [& {:keys [split-size, node-factory-fn]
                :or {split-size 5
                     node-factory-fn identity}}]
@@ -150,7 +147,13 @@
    :split-size split-size
    :node-factory-fn node-factory-fn})
 
-(defn tree-get [tree bbox])
+(defn tree-values-contained-by [tree bbox])
+
+(defn tree-values-intersecting [tree bbox]
+  (leafs-interacting-bbox intersects-bbox? (:root tree) bbox))
+
+(defn tree-values-containing [tree bbox]
+  (leafs-interacting-bbox contains-bbox? (:root tree) bbox))
 
 (defn tree-add [tree & values]
   (assoc tree :root
