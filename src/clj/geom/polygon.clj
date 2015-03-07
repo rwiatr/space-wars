@@ -4,7 +4,8 @@
 
 (defrecord Polygon [points])
 (defn polygon [points]
-  (if (< 3 (count points)) (throw (Exception. (str "Polygon can't be build from less then three points. Input=[" points "]"))))
+  ;; TODO enable and fix defects in code
+  ;(if (> 3 (count points)) (throw (Exception. (str "Polygon can't be build from less then three points. Input=[" points "]"))))
   (Polygon. points))
 
 (defn to-bbox [polygon]
@@ -22,12 +23,12 @@
       (if (and max-x max-y min-x min-y)
         (bbox-xy min-x min-y max-x max-y)))))
 
-(defn- in-pairs
-  ([points] (in-pairs points (first points)))
+(defn iterate-polygon-pairs
+  ([points] (iterate-polygon-pairs points (first points)))
   ([points p0]
    (if-let [p1 (first points)]
      (if-let [p2 (second points)]
-       (cons [p1 p2] (lazy-seq (in-pairs (rest points))))
+       (cons [p1 p2] (lazy-seq (iterate-polygon-pairs (rest points) p0)))
        (list [p1 p0])))))
 
 (defn- ray-intersect? [p b1 b2]
@@ -42,4 +43,4 @@
 
 (defn point-in-poly? [point poly]
   (let [poly-bbox (to-bbox poly)]
-    (even? (reduce + (for [[a b] (in-pairs (:points poly)) :when (ray-intersect? point a b)] 1)))))
+    (odd? (reduce + (for [[a b] (iterate-polygon-pairs (:points poly)) :when (ray-intersect? point a b)] 1)))))

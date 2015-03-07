@@ -5,6 +5,8 @@
             [geom.bbox :refer :all]))
 
 (deftest test.polygon
+  ;(testing "throws excpetion"
+  ;  (is (thrown-with-msg? Exception #"Polygon can't be build from less then three points. Input=" (polygon [1 15]))))
   (testing "equal"
     (is (= (polygon [1 15 16]) (polygon [1 15 16]))))
   (testing "not-equal"
@@ -15,6 +17,11 @@
 (deftest test.to-bbox
   (testing "polygon to bbox"
     (is (= (bbox 0 0 100 200) (to-bbox (polygon [(point 0 0) (point 100 0) (point 0 200)]))))))
+
+(deftest test.iterate-polygon-pairs
+  (testing "iterate using every point pair"
+    (is (= (list [(point 0 0) (point 0 100)] [(point 0 100) (point 13 10)] [(point 13 10) (point 0 0)])
+           (iterate-polygon-pairs (:points (polygon [(point 0 0) (point 0 100) (point 13 10)])))))))
 
 (deftest test.point-in-poly?
   (testing "point in polygon"
