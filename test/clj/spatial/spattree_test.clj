@@ -204,4 +204,47 @@
                                                            {:bbox (bbox 2 0 15 50) :value 2}
                                                            {:bbox (bbox 3 0 15 50) :value 3}
                                                            {:bbox (bbox 4 0 15 50) :value 4}
-                                                           {:bbox (bbox 5 0 15 50) :value 5})))))))
+                                                           {:bbox (bbox 5 0 15 50) :value 5}))))))
+  (testing "get values containing bbox or nothing"
+    (is (= #{{:bbox (bbox-xy 20 20 25 25) :value 1}
+             {:bbox (bbox-xy 23 23 30 30) :value 2}}
+           (into #{} (tree-values-containing (tree-add (tree)
+                                                       {:bbox (bbox-xy 20 20 25 25) :value 1}
+                                                       {:bbox (bbox-xy 23 23 30 30) :value 2}
+                                                       {:bbox (bbox-xy -23 -23 -30 -30) :value 3}
+                                                       {:bbox (bbox-xy -20 -20 -30 -30) :value 4}
+                                                       {:bbox (bbox-xy 20 20 23 23) :value 5})
+                                             {:bbox (bbox-xy 23 23 24 24)}))))
+    (is (empty? (tree-values-containing (tree-add (tree)
+                                                  {:bbox (bbox-xy 20 20 25 25) :value 1}
+                                                  {:bbox (bbox-xy 23 23 30 30) :value 2}
+                                                  {:bbox (bbox-xy -23 -23 -30 -30) :value 3}
+                                                  {:bbox (bbox-xy -20 -20 -30 -30) :value 4}
+                                                  {:bbox (bbox-xy 20 20 23 23) :value 2})
+                                        {:bbox (bbox-xy 23 23 24 240)}))))
+  (testing "get values intersecting bbox or nothing"
+    (is (= #{{:bbox (bbox-xy 20 20 25 25) :value 1}
+             {:bbox (bbox-xy 23 23 30 30) :value 2}}
+           (into #{} (tree-values-intersecting (tree-add (tree)
+                                                         {:bbox (bbox-xy 20 20 25 25) :value 1}
+                                                         {:bbox (bbox-xy 23 23 30 30) :value 2}
+                                                         {:bbox (bbox-xy -23 -23 -30 -30) :value 3}
+                                                         {:bbox (bbox-xy -20 -20 -30 -30) :value 4}
+                                                         {:bbox (bbox-xy 20 20 23 23) :value 5})
+                                               {:bbox (bbox-xy 23 23 24 24)}))))
+    (is (= #{{:bbox (bbox-xy 20 20 25 25) :value 1}
+             {:bbox (bbox-xy 23 23 30 30) :value 2}}
+           (into #{} (tree-values-intersecting (tree-add (tree)
+                                                         {:bbox (bbox-xy 20 20 25 25) :value 1}
+                                                         {:bbox (bbox-xy 23 23 30 30) :value 2}
+                                                         {:bbox (bbox-xy -23 -23 -30 -30) :value 3}
+                                                         {:bbox (bbox-xy -20 -20 -30 -30) :value 4}
+                                                         {:bbox (bbox-xy 20 20 23 23) :value 5})
+                                               {:bbox (bbox-xy 23 23 24 240)}))))
+    (is (empty? (tree-values-intersecting (tree-add (tree)
+                                                    {:bbox (bbox-xy 20 20 25 25) :value 1}
+                                                    {:bbox (bbox-xy 23 23 30 30) :value 2}
+                                                    {:bbox (bbox-xy -23 -23 -30 -30) :value 3}
+                                                    {:bbox (bbox-xy -20 -20 -30 -30) :value 4}
+                                                    {:bbox (bbox-xy 20 20 23 23) :value 5})
+                                          {:bbox (bbox-xy 230 230 240 240)})))))
