@@ -28,7 +28,8 @@
   (if (empty? values) node
     (recur (-> node
                (update-in [:sub] conj (first values))
-               (update-in [:bbox] (partial multi-bbox-max (:bbox (first values)))))
+               (update-in [:bbox] (partial multi-bbox-max (:bbox (first values))))
+               (update-in [:bottom-leafs] + (or (:bottom-leafs (first values)) 1)))
            (rest values))))
 
 (defn create-node
@@ -55,7 +56,7 @@
 (defn choose-seeds
   "choose two items with biggest cost-fn"
   [items]
-  (let [pairs (p-seq items)] ;; TODO refactor for into more efficient
+  (let [pairs (p-seq items)]
     (if (empty? pairs) (throw (Exception. (str "Can't build any pairs from input [" (clojure.string/join "," items) "]"))))
     (loop [pair (first pairs)
            cost (cost-fn (first pair) (second pair))
@@ -73,7 +74,7 @@
   (let [[seed1, seed2] (choose-seeds items)]
     (loop [node1 (create-node seed1)
            node2 (create-node seed2)
-           items items]
+           items (filter #(not (or (identical? % seed2) (identical? % seed1))) items)]
       (if (empty? items) (vector node1 node2)
         (if (< (area-diff (into-node node1 (first items)) node1)
                (area-diff (into-node node2 (first items)) node2))

@@ -5,19 +5,19 @@
 
 (deftest test.node
   (testing "creation"
-    (is (= {:sub #{}} (create-node)))
+    (is (= {:bottom-leafs 0 :sub #{}} (create-node)))
     (is (thrown-with-msg? Exception #"bbox can't be nil" (create-node {:v :a})))
-    (is (= {:sub #{{:val 'value :bbox (bbox 0 0 100 100)}}, :bbox (bbox 0 0 100 100)}
+    (is (= {:bottom-leafs 1 :sub #{{:val 'value :bbox (bbox 0 0 100 100)}}, :bbox (bbox 0 0 100 100)}
            (create-node {:val 'value :bbox (bbox 0 0 100 100)})))
-    (is (= {:sub #{{:val 'v1 :bbox (bbox 0 0 100 100)}
-                   {:val 'v2 :bbox (bbox -150 -10 -5 -5)}}, :bbox (bbox -150 -10 250 110)}
+    (is (= {:bottom-leafs 2 :sub #{{:val 'v1 :bbox (bbox 0 0 100 100)}
+                                   {:val 'v2 :bbox (bbox -150 -10 -5 -5)}}, :bbox (bbox -150 -10 250 110)}
            (create-node {:val 'v1 :bbox (bbox 0 0 100 100)}
                         {:val 'v2 :bbox (bbox -150 -10 -5 -5)}))))
   (testing "modification"
-    (is (= {:sub #{{:val 'value :bbox (bbox 0 0 100 100)}}, :bbox (bbox 0 0 100 100)}
+    (is (= {:bottom-leafs 1 :sub #{{:val 'value :bbox (bbox 0 0 100 100)}}, :bbox (bbox 0 0 100 100)}
            (-> (create-node) (into-node {:val 'value :bbox (bbox 0 0 100 100)}))))
-    (is (= {:sub #{{:val 'v1 :bbox (bbox 0 0 100 100)}
-                   {:val 'v2 :bbox (bbox -150 -10 -5 -5)}}, :bbox (bbox -150 -10 250 110)}
+    (is (= {:bottom-leafs 2 :sub #{{:val 'v1 :bbox (bbox 0 0 100 100)}
+                                   {:val 'v2 :bbox (bbox -150 -10 -5 -5)}}, :bbox (bbox -150 -10 250 110)}
            (-> (create-node) (into-node {:val 'v1 :bbox (bbox 0 0 100 100)}
                                         {:val 'v2 :bbox (bbox -150 -10 -5 -5)}))))))
 
@@ -44,12 +44,15 @@
 
 (deftest test.split-node
   (testing "split node into smaller pieces"
-    (is (= [(create-node{:bbox (bbox 0 10 100 100)}
-                               {:bbox (bbox 10 10 100 100)}
-                               {:bbox (bbox 0 0 100 100)}
-                               {:bbox (bbox 0 0 100 10)})
-            (create-node{:bbox (bbox 0 0 10 5)}
-                               {:bbox (bbox 0 0 10 10)})]
+    (is (= [(create-node {:bbox (bbox-xy 0 10 15 20)})
+            (create-node {:bbox (bbox-xy 5 20 15 50)})]
+            (split-node (create-node {:bbox (bbox-xy 0 10 15 20)} {:bbox (bbox-xy 5 20 15 50)}))))
+    (is (= [(create-node {:bbox (bbox 0 10 100 100)}
+                         {:bbox (bbox 10 10 100 100)}
+                         {:bbox (bbox 0 0 100 100)}
+                         {:bbox (bbox 0 0 100 10)})
+            (create-node {:bbox (bbox 0 0 10 5)}
+                         {:bbox (bbox 0 0 10 10)})]
            (split-node (create-node {:bbox (bbox 0 0 10 10)} {:bbox (bbox 10 10 100 100)}
                                     {:bbox (bbox 0 0 10 5)} {:bbox (bbox 0 10 100 100)}
                                     {:bbox (bbox 0 0 10 10)} {:bbox (bbox 0 0 100 100)}
