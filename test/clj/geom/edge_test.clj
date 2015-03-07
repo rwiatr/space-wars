@@ -1,4 +1,4 @@
-(ns geom.edge
+(ns geom.edge_test
   (:require [clojure.test :refer :all]
             [geom.edge :refer :all]
             [geom.point :refer :all]

@@ -3,17 +3,19 @@
             [graph.converters :refer :all]
             [graph.mapgraph :refer :all]
             [geom.point :refer :all]
+            [geom.bbox :refer :all]
             [geom.polygon :refer :all]
             [geom.triangle :refer :all]
             [util.set_multimap :refer :all]
             [util.key_gen :refer :all]
-            [spatial.spattree :refer [tree, tree-add, tree-breath-first-bbox-seq]]
-            [quil.core :as q])
+            [spatial.spattree :refer [tree, tree-add, tree-breath-first-bbox-seq, tree-values-containing]]
+            [quil.core :as q]
+            [quil.middleware :as m])
   (:gen-class))
 
 (defn setup []
   (q/smooth)                          ;; Turn on anti-aliasing
-  (q/frame-rate 1)                    ;; Set framerate to 1 FPS
+  (q/frame-rate 60)                    ;; Set framerate to 1 FPS
   (q/background 0))                 ;; Set the background colour to
 ;; a nice shade of grey.
 (def min_ 10)
@@ -33,16 +35,17 @@
 (def g (as-graph (point->points p->t) (point->polygon p->t)))
 
 (defn boxes [g]
-  (let [kfn (key-mem inc-key)]
+  (let [kfn ((key-mem inc-key) "ndx")]
     (loop [nodes (:nodes g)
-           t (tree :node-factory-fn (fn [{b :bbox}] {:bbox b :value (kfn "ndx")})
+           t (tree :node-factory-fn (fn [{b :bbox v :geometry}] {:bbox b :value v})
                    :split-size 10)]
       (if-let [n (first nodes)]
         (recur (rest nodes)
-               (tree-add t {:bbox (to-bbox (g-get-prop g n :geometry))}))
+               (tree-add t {:bbox (to-bbox (g-get-prop g n :geometry)) :geometry (g-get-prop g n :geometry)}))
         t))))
 
-(def box-vals (reverse (tree-breath-first-bbox-seq (boxes g))))
+(def t (boxes g))
+(def box-vals (reverse (tree-breath-first-bbox-seq t)))
 (println (second (first box-vals)))
 
 (def colors (cycle [[0 0 204] [255 153 153] [0 204 204] [204 102 0] [204 0 0]]))
@@ -82,7 +85,20 @@
   (doseq [t bwt]
     (drawpoints (points t))))
 
-(defn draw []
+(def selected (atom nil))
+
+(defn press [old-state event]
+  (swap! selected #(do %2) event))
+
+(defn draw-selected []
+  (if-let [selected-val @selected]
+    (if-let [values (not-empty (map :value (tree-values-containing t {:bbox (bbox (:x selected-val) (:y selected-val) 1 1)})))]
+      (doall (map drawpoly values)))))
+
+(tree-values-containing t {:bbox (bbox 262 355 1 1)})
+
+(defn draw [s]
+  (q/background-float 0x20)
   (q/stroke 120)
   (q/stroke-weight 1)
   (q/stroke 255 0 0)
@@ -93,11 +109,14 @@
   (q/stroke 0 255 255)
   (draw-points g)
   (doseq [[b l] box-vals] (drawbox b l))
-  )
+  (q/stroke 255 0 255)
+  (draw-selected))
 
 (q/defsketch example                  ;; Define a new sketch named example
   :title "Oh so many grey circles"    ;; Set the title of the sketch
   :setup setup                        ;; Specify the setup fn
   :draw draw                          ;; Specify the draw fn
-  :size [820 820])
+  :mouse-pressed press
+  :size [820 820]
+  :middleware [m/fun-mode])
 

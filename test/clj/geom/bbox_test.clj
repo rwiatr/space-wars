@@ -1,4 +1,4 @@
-(ns geom.circle_test
+(ns geom.bbox_test
   (:require [clojure.test :refer :all]
             [geom.bbox :refer :all]))
 

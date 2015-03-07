@@ -168,5 +168,3 @@
 
 (defn tree-breath-first-bbox-seq [tree]
   (for [[{bbox :bbox} i] (breath-first-seq (:root tree) succ :with-level true)] [bbox i]))
-
-(defn tree-find [tree bbox])
