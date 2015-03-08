@@ -2,6 +2,7 @@
   :source-paths ["src/clj"]
   :test-paths   ["test/clj"]
   :dependencies [[pjstadig/humane-test-output "0.6.0"]
+                 [org.clojure/tools.logging "0.3.1"]
                  [quil "2.2.4"]
                  [org.clojure/clojure "1.6.0"]
                  [org.clojure/algo.generic "0.1.2"]

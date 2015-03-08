@@ -10,14 +10,11 @@
             [util.key_gen :refer :all]
             [spatial.spattree :refer [tree, tree-add, tree-breath-first-bbox-seq, tree-values-containing]]
             [quil.core :as q]
-            [quil.middleware :as m])
+            [space-wars.game-state :refer [generate-level]]
+            [quil.middleware :as m]
+            [space-wars.quil-ui-handlers :as handlers])
   (:gen-class))
 
-(defn setup []
-  (q/smooth)                          ;; Turn on anti-aliasing
-  (q/frame-rate 60)                    ;; Set framerate to 1 FPS
-  (q/background 0))                 ;; Set the background colour to
-;; a nice shade of grey.
 (def min_ 10)
 (def size_ 800)
 (def max_ (+ min_ size_))
@@ -27,7 +24,7 @@
 (defn trn [a b c d e f]
   (triangle (point a b) (point c d) (point e f)))
 
-(def pts (take 100 (random-points))); (point 0 0) (point 800 0) (point 0 600) (point 800 600)))
+(def pts (take 200 (random-points))); (point 0 0) (point 800 0) (point 0 600) (point 800 600)))
 (def bwt (bowyer-watson_2d pts :boundries #{(triangle min_ min_ max_ min_ max_ max_) (triangle min_ min_ min_ max_ max_ max_)}))
 ;#{(triangle (point -100000 -100000) (point 100000 -100000) (point 0 100000))})))
 (def p->t (point->triangles bwt))
@@ -112,11 +109,15 @@
   (q/stroke 255 0 255)
   (draw-selected))
 
+;(def lvl (generate-level))
+
 (q/defsketch example                  ;; Define a new sketch named example
   :title "Oh so many grey circles"    ;; Set the title of the sketch
-  :setup setup                        ;; Specify the setup fn
-  :draw draw                          ;; Specify the draw fn
-  :mouse-pressed press
+  :setup (handlers/setup-factory t g)
+  ;(handlers/setup-factory (-> lvl :map :rtree) (-> lvl :map :graph))
+  :draw handlers/draw-ui                          ;; Specify the draw fn
+  :mouse-pressed handlers/map-select
   :size [820 820]
+  :key-pressed handlers/monitoring-key-handler
   :middleware [m/fun-mode])
 

@@ -8,6 +8,12 @@
   (testing "after adding to graph its not empty"
     (is (not (-> (graph) (g-add :a) g-empty?)))))
 
+(deftest test.g-empty
+  (testing "is empty when no elements added"
+    (is (empty? (g-nodes (graph)))))
+  (testing "after adding to graph its not empty"
+    (is (= #{:a} (-> (graph) (g-add :a) g-nodes)))))
+
 (deftest test.g-contains?
   (testing "empty graph does not contain node"
     (is (not (g-contains? (graph) :a)))

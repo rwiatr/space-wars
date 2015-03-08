@@ -7,6 +7,9 @@
                :nodes #{}
                :data {}})
 
+(defn g-nodes [g]
+  (:nodes g))
+
 (defn g-empty? [g]
   (-> g :nodes empty?))
 
