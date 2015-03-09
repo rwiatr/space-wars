@@ -17,14 +17,8 @@
 (def m (long-array 64))
 
 (defn quil-fps []
-  (let [data (atom (list))
-        last-ts (atom (System/currentTimeMillis))]
-    (fn []
-      (let [current-ts (System/currentTimeMillis)]
-        (swap! data (fn [data] (take 8 (conj data (- current-ts @last-ts)))))
-        (swap! last-ts (fn [ts] current-ts)))
-      (q/stroke 255)
-      (q/text (format "%.2f fps" (double (/ (reduce (fn [total item] (+ total (/ 1 (/ item 1000)))) @data) (count @data)))) 0 11))))
+  (q/stroke 255)
+  (q/text (format "%.2f fps" (q/current-frame-rate)) 0 11))
 
 ;; SETUP
 (defn build-state [map-rtree, map-graph]
@@ -32,8 +26,7 @@
    :map-graph map-graph
    :main-monitor-display false
    :main-monitor (monit/atom-map-monit)
-   :fps-counter-display true
-   :fps-counter (quil-fps)})
+   :fps-counter-display true})
 
 (defn setup-factory [map-rtree map-graph]
   (fn []
@@ -64,7 +57,7 @@
   (if-let [map-graph (:map-graph state)]
     (let [polygons (for [node (g-nodes map-graph)] (g-get-prop map-graph node :geometry))]
       (doseq [polygon polygons]
-        (q/stroke-weight 1)
+        (q/stroke-weight 2)
         (q/stroke 0 0 255)
         (quil-draw-polygon polygon)))
     state))
@@ -79,7 +72,7 @@
 
 (defn draw-monitoring [state]
   (if (:main-monitor-display state) (q/text (str (:main-monitor state)) 0 24))
-  (if (:fps-counter-display state) ((:fps-counter state))))
+  (if (:fps-counter-display state) (quil-fps)))
 
 (defn draw-ui [state]
   (monit/timer (q/background-float 0x20) (:main-monitor state))

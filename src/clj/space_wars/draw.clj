@@ -24,7 +24,7 @@
 (defn trn [a b c d e f]
   (triangle (point a b) (point c d) (point e f)))
 
-(def pts (take 200 (random-points))); (point 0 0) (point 800 0) (point 0 600) (point 800 600)))
+(def pts (take 300 (random-points))); (point 0 0) (point 800 0) (point 0 600) (point 800 600)))
 (def bwt (bowyer-watson_2d pts :boundries #{(triangle min_ min_ max_ min_ max_ max_) (triangle min_ min_ min_ max_ max_ max_)}))
 ;#{(triangle (point -100000 -100000) (point 100000 -100000) (point 0 100000))})))
 (def p->t (point->triangles bwt))
@@ -114,6 +114,7 @@
 (q/defsketch example                  ;; Define a new sketch named example
   :title "Oh so many grey circles"    ;; Set the title of the sketch
   :setup (handlers/setup-factory t g)
+  ;:renderer :opengl
   ;(handlers/setup-factory (-> lvl :map :rtree) (-> lvl :map :graph))
   :draw handlers/draw-ui                          ;; Specify the draw fn
   :mouse-pressed handlers/map-select
