@@ -45,7 +45,7 @@
   (if-let [map-rtree (:map-rtree state)]
     (if-let [selected (not-empty (tree-values-containing map-rtree {:bbox (bbox (:x event) (:y event) 0 0)}))]
       (let [selected (filter (partial point-in-poly? (point (:x event) (:y event)))
-                             (map :value selected))]
+                             (map #(-> % :value :geometry) selected))]
         (log/info "event " event " selected " selected)
         selected))))
 
