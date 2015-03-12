@@ -27,8 +27,7 @@
   ([] (generate-level 100 600))
   ([min_ size_]
    (let [max_ (+ min_ size_)
-         points (take 400 (spiral-points 400 400 0.5 0.32711 0))
-         ;(take 1000 (random-points min_ size_))
+         points (concat (take 350 (spiral-points 400 400 0.33 0.7711 0)) (take 350 (random-points min_ size_)))
          triangles (bowyer-watson_2d points :boundries #{(triangle min_ min_ max_ min_ max_ max_) (triangle min_ min_ min_ max_ max_ max_)})
          point->triangles-mm (point->triangles triangles)
          graph (as-graph (point->points point->triangles-mm) (point->polygon point->triangles-mm))
