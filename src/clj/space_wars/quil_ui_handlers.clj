@@ -21,7 +21,7 @@
   (q/text (format "%.2f fps" (q/current-frame-rate)) 0 11))
 
 ;; SETUP
-(defn build-state [map-rtree, map-graph]
+(defn build-state [map-graph map-rtree]
   {:map-rtree map-rtree
    :map-graph map-graph
    :main-monitor-display false
@@ -29,12 +29,12 @@
    :fps-counter-display true
    :centers-display false})
 
-(defn setup-factory [map-rtree map-graph]
+(defn setup-factory [{map-graph :graph map-rtree :rtree}]
   (fn []
     (q/smooth)
     (q/frame-rate 60)
     (q/background 0)
-    (build-state map-rtree map-graph)))
+    (build-state map-graph map-rtree)))
 
 ;; EVENTS
 (defn monitoring-key-handler [state event]

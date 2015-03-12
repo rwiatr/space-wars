@@ -13,15 +13,15 @@
 
 
 (defn- spiral-points [cx cy a b angle] (let [r (* a angle)] (cons (point (+ cx (* r (Math/cos angle))) (+ cy (* r (Math/sin angle))))
-                                                                                          (lazy-seq (spiral-points cx cy a b (+ (* b Math/PI) angle))))))
+                                                                  (lazy-seq (spiral-points cx cy a b (+ (* b Math/PI) angle))))))
 
 
 (defn- as-tree [graph]
   (doall (reduce (fn [rtree node]
-            (tree-add rtree {:bbox (to-bbox (g-get-prop graph node :geometry))
-                             :value node}))
-          (tree :split-size 10)
-          (g-nodes graph))))
+                   (tree-add rtree {:bbox (to-bbox (g-get-prop graph node :geometry))
+                                    :value node}))
+                 (tree :split-size 10)
+                 (g-nodes graph))))
 
 (defn generate-level
   ([] (generate-level 100 600))

@@ -5,11 +5,9 @@
             [space-wars.quil-ui-handlers :as handlers])
   (:gen-class))
 
-(def lvl (generate-level))
-
 (q/defsketch example
   :title "MAP"
-  :setup (handlers/setup-factory (-> lvl :rtree) (-> lvl :graph))
+  :setup (handlers/setup-factory (generate-level))
   :renderer :opengl
   :draw handlers/draw-ui
   :mouse-pressed handlers/map-select
