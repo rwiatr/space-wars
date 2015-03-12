@@ -19,10 +19,8 @@
 (defn- as-tree [graph]
   (doall (reduce (fn [rtree node]
             (tree-add rtree {:bbox (to-bbox (g-get-prop graph node :geometry))
-                             :geometry (g-get-prop graph node :geometry)}))
-          (tree :node-factory-fn (fn [{bbox :bbox geometry :geometry}]
-                                   {:bbox bbox :value {:geometry geometry}})
-                :split-size 10)
+                             :value node}))
+          (tree :split-size 10)
           (g-nodes graph))))
 
 (defn generate-level

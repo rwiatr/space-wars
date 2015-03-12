@@ -26,7 +26,8 @@
    :map-graph map-graph
    :main-monitor-display false
    :main-monitor (monit/atom-map-monit)
-   :fps-counter-display true})
+   :fps-counter-display true
+   :centers-display false})
 
 (defn setup-factory [map-rtree map-graph]
   (fn []
@@ -38,19 +39,21 @@
 ;; EVENTS
 (defn monitoring-key-handler [state event]
   (if (= (q/key-code) KeyEvent/VK_M) (update-in state [:main-monitor-display] not)
-    (if (= (q/key-code) KeyEvent/VK_K) (update-in state [:fps-counter-display] not) state)))
+    (if (= (q/key-code) KeyEvent/VK_K) (update-in state [:fps-counter-display] not)
+      (if (= (q/key-code) KeyEvent/VK_O) (update-in state [:centers-display] not) state))))
 
 ;; SELECTION EVENTS
-(defn- select-map-polygon [state event]
+(defn- select-map-polygons [state event]
   (if-let [map-rtree (:map-rtree state)]
-    (if-let [selected (not-empty (tree-values-containing map-rtree {:bbox (bbox (:x event) (:y event) 0 0)}))]
-      (let [selected (filter (partial point-in-poly? (point (:x event) (:y event)))
-                             (map #(-> % :value :geometry) selected))]
-        (log/info "event " event " selected " selected)
-        selected))))
+    (if-let [map-graph (:map-graph state)]
+      (if-let [selected (not-empty (tree-values-containing map-rtree {:bbox (bbox (:x event) (:y event) 0 0)}))]
+        (let [selected (filter (partial point-in-poly? (point (:x event) (:y event)))
+                               (map (fn [{node :value}] (g-get-prop map-graph node :geometry)) selected))]
+          (log/info "event " event " selected " selected)
+          selected)))))
 
 (defn map-select [state event]
-  (assoc state :map-selected-polygon (first (select-map-polygon state event))))
+  (assoc state :map-selected-polygon (first (select-map-polygons state event))))
 
 ;; DRAWING
 (defn draw-map [state]
